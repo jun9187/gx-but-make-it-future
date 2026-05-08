@@ -55,7 +55,7 @@ class AppShell extends ConsumerWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xs,
+                  horizontal: AppSpacing.sm,
                   vertical: AppSpacing.xs,
                 ),
                 child: Row(
@@ -98,15 +98,15 @@ class _ShellNavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm,
+          horizontal: AppSpacing.xs,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           gradient: isActive
               ? const LinearGradient(
-                  colors: [
-                    Color(0x666F4CFF),
-                    Color(0x66D946EF),
-                  ],
+                  colors: [Color(0x666F4CFF), Color(0x66D946EF)],
                 )
               : null,
         ),
@@ -115,7 +115,7 @@ class _ShellNavItem extends StatelessWidget {
           children: [
             Icon(
               destination.icon,
-              size: 22,
+              size: 20,
               color: isActive ? AppColors.textPrimary : AppColors.textMuted,
             ),
             const SizedBox(height: 6),
@@ -124,10 +124,11 @@ class _ShellNavItem extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isActive ? AppColors.textPrimary : AppColors.textMuted,
-                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                    fontSize: 11,
-                  ),
+                color: isActive ? AppColors.textPrimary : AppColors.textMuted,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 11,
+                letterSpacing: 0.1,
+              ),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../core/constants/app_spacing.dart';
 
@@ -27,16 +28,10 @@ class SectionHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text(title, style: Theme.of(context).textTheme.titleLarge),
               if (subtitle != null) ...[
                 const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  subtitle!,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text(subtitle!, style: Theme.of(context).textTheme.bodyMedium),
               ],
             ],
           ),
@@ -44,11 +39,8 @@ class SectionHeader extends StatelessWidget {
         if (trailing != null)
           trailing!
         else if (actionLabel != null)
-          TextButton(
-            onPressed: onActionTap,
-            child: Text(actionLabel!),
-          ),
+          TextButton(onPressed: onActionTap, child: Text(actionLabel!)),
       ],
-    );
+    ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.03, end: 0);
   }
 }

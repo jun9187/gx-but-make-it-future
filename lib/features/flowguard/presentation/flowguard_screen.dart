@@ -6,6 +6,7 @@ import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/app_progress_bar.dart';
+import '../../../shared/widgets/feature_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/gradient_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
@@ -31,19 +32,16 @@ class FlowguardScreen extends StatelessWidget {
           120,
         ),
         children: [
-          const _FlowGuardTopBar()
-              .animate()
-              .fadeIn(duration: 220.ms)
-              .slideY(begin: 0.05, end: 0),
+          const FeatureTopBar(
+            title: 'FlowGuard',
+          ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.05, end: 0),
           const SizedBox(height: AppSpacing.xl),
           _StatusCard(data: data.status)
               .animate()
               .fadeIn(delay: 60.ms, duration: 280.ms)
               .slideY(begin: 0.08, end: 0),
           const SizedBox(height: AppSpacing.xl),
-          const SectionHeader(
-            title: 'Pre-Commitment Guardrails',
-          ).animate().fadeIn(delay: 120.ms, duration: 220.ms),
+          const SectionHeader(title: 'Pre-Commitment Guardrails'),
           const SizedBox(height: AppSpacing.md),
           GlassCard(
             padding: EdgeInsets.zero,
@@ -71,37 +69,6 @@ class FlowguardScreen extends StatelessWidget {
   }
 }
 
-class _FlowGuardTopBar extends StatelessWidget {
-  const _FlowGuardTopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const IconCircle(
-          icon: Icons.arrow_back_rounded,
-          size: 36,
-          iconSize: 18,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            'FlowGuard',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        const IconCircle(
-          icon: Icons.notifications_none_rounded,
-          size: 36,
-          iconSize: 18,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        const _ProfileAvatar(),
-      ],
-    );
-  }
-}
-
 class _StatusCard extends StatelessWidget {
   const _StatusCard({required this.data});
 
@@ -114,10 +81,7 @@ class _StatusCard extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [
-          AppColors.heroStart,
-          AppColors.heroEnd,
-        ],
+        colors: [AppColors.heroStart, AppColors.heroEnd],
       ),
       borderColor: const Color(0x40FFFFFF),
       boxShadow: const [
@@ -132,9 +96,9 @@ class _StatusCard extends StatelessWidget {
         children: [
           Text(
             'FlowGuard',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: Colors.white,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineMedium?.copyWith(color: Colors.white),
           ),
           const SizedBox(height: AppSpacing.lg),
           Container(
@@ -142,9 +106,7 @@ class _StatusCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.14),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -152,9 +114,9 @@ class _StatusCard extends StatelessWidget {
                 Text(
                   'You have spent ${formatCurrency(data.spentToday)} today, ${formatCurrency(data.overLimitAmount)} above your daily safe limit.',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.94),
-                        height: 1.45,
-                      ),
+                    color: Colors.white.withValues(alpha: 0.94),
+                    height: 1.45,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppProgressBar(
@@ -162,10 +124,7 @@ class _StatusCard extends StatelessWidget {
                   height: 8,
                   backgroundColor: Colors.white.withValues(alpha: 0.15),
                   gradient: const LinearGradient(
-                    colors: [
-                      Color(0xFFFF3D4F),
-                      Color(0xFFFF005C),
-                    ],
+                    colors: [Color(0xFFFF3D4F), Color(0xFFFF005C)],
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -173,9 +132,9 @@ class _StatusCard extends StatelessWidget {
                   child: Text(
                     'SAFE LIMIT: ${formatCurrency(data.safeLimit)} / ${formatCurrency(data.spentToday)}',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          letterSpacing: 0.4,
-                        ),
+                      color: Colors.white.withValues(alpha: 0.9),
+                      letterSpacing: 0.4,
+                    ),
                   ),
                 ),
               ],
@@ -221,18 +180,15 @@ class _GuardrailRow extends StatelessWidget {
                 Text(
                   data.subtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.md),
           if (data.state == _GuardrailState.active)
-            PillBadge(
-              label: 'Active',
-              isSelected: true,
-            )
+            PillBadge(label: 'Active', isSelected: true)
           else if (data.state == _GuardrailState.locked)
             const Icon(
               Icons.lock_outline_rounded,
@@ -269,10 +225,7 @@ class _RecoveryNudgeCard extends StatelessWidget {
                 size: 32,
                 iconSize: 16,
                 gradient: LinearGradient(
-                  colors: [
-                    AppColors.heroStart,
-                    AppColors.heroEnd,
-                  ],
+                  colors: [AppColors.heroStart, AppColors.heroEnd],
                 ),
                 color: Colors.white,
               ),
@@ -293,9 +246,9 @@ class _RecoveryNudgeCard extends StatelessWidget {
           Text(
             data.message,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.45,
-                ),
+              color: AppColors.textSecondary,
+              height: 1.45,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Row(
@@ -304,10 +257,7 @@ class _RecoveryNudgeCard extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFE6C7FF),
-                        Color(0xFFCAA8FF),
-                      ],
+                      colors: [Color(0xFFE6C7FF), Color(0xFFCAA8FF)],
                     ),
                     borderRadius: BorderRadius.circular(AppRadius.pill),
                   ),
@@ -343,43 +293,6 @@ class _RecoveryNudgeCard extends StatelessWidget {
   }
 }
 
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFEAF9DB),
-            Color(0xFF6FCF97),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFAFAF3),
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-        child: const Center(
-          child: Text(
-            'Y',
-            style: TextStyle(
-              color: Color(0xFF2B7A4B),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _FlowGuardScreenData {
   const _FlowGuardScreenData({
     required this.status,
@@ -406,11 +319,7 @@ class _StatusCardData {
   double get progress => spentToday == 0 ? 0 : safeLimit / spentToday;
 }
 
-enum _GuardrailState {
-  standard,
-  active,
-  locked,
-}
+enum _GuardrailState { standard, active, locked }
 
 class _GuardrailData {
   const _GuardrailData({
@@ -441,11 +350,7 @@ class _RecoveryNudgeData {
 }
 
 const _flowGuardData = _FlowGuardScreenData(
-  status: _StatusCardData(
-    spentToday: 64,
-    safeLimit: 42,
-    overLimitAmount: 22,
-  ),
+  status: _StatusCardData(spentToday: 64, safeLimit: 42, overLimitAmount: 22),
   guardrails: [
     _GuardrailData(
       title: 'Daily Flexible Spending',

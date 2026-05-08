@@ -15,6 +15,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: DashboardScreen.routePath,
     routes: [
+      GoRoute(
+        path: FutureHomeScreen.routePath,
+        name: FutureHomeScreen.routeName,
+        builder: (context, state) => const FutureHomeScreen(),
+      ),
+      GoRoute(
+        path: ShopScreen.routePath,
+        name: ShopScreen.routeName,
+        builder: (context, state) => const ShopScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
           return AppShell(navigationShell: navigationShell);
@@ -53,24 +63,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: FlowguardScreen.routePath,
                 name: FlowguardScreen.routeName,
                 builder: (context, state) => const FlowguardScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: FutureHomeScreen.routePath,
-                name: FutureHomeScreen.routeName,
-                builder: (context, state) => const FutureHomeScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: ShopScreen.routePath,
-                name: ShopScreen.routeName,
-                builder: (context, state) => const ShopScreen(),
               ),
             ],
           ),

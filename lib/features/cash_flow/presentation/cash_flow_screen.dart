@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../shared/widgets/app_progress_bar.dart';
+import '../../../shared/widgets/feature_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -29,10 +30,9 @@ class CashFlowScreen extends StatelessWidget {
           120,
         ),
         children: [
-          const _CashFlowTopBar()
-              .animate()
-              .fadeIn(duration: 220.ms)
-              .slideY(begin: 0.05, end: 0),
+          const FeatureTopBar(
+            title: 'Cash Flow',
+          ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.05, end: 0),
           const SizedBox(height: AppSpacing.lg),
           _InsightBanner(text: data.insight)
               .animate()
@@ -44,51 +44,18 @@ class CashFlowScreen extends StatelessWidget {
             categories: data.categories,
           ).animate().fadeIn(delay: 110.ms, duration: 280.ms),
           const SizedBox(height: AppSpacing.xl),
-          const SectionHeader(
-            title: 'Categories',
-            actionLabel: 'View all',
-          ).animate().fadeIn(delay: 170.ms, duration: 240.ms),
+          const SectionHeader(title: 'Categories', actionLabel: 'View all'),
           const SizedBox(height: AppSpacing.md),
           for (var i = 0; i < data.categories.length; i++) ...[
-            _CategoryTile(data: data.categories[i])
-                .animate()
-                .fadeIn(delay: Duration(milliseconds: 210 + (i * 55)), duration: 240.ms),
+            _CategoryTile(data: data.categories[i]).animate().fadeIn(
+              delay: Duration(milliseconds: 210 + (i * 55)),
+              duration: 240.ms,
+            ),
             if (i != data.categories.length - 1)
               const SizedBox(height: AppSpacing.md),
           ],
         ],
       ),
-    );
-  }
-}
-
-class _CashFlowTopBar extends StatelessWidget {
-  const _CashFlowTopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const IconCircle(
-          icon: Icons.arrow_back_rounded,
-          size: 36,
-          iconSize: 18,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            'Cash Flow',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        const IconCircle(
-          icon: Icons.notifications_none_rounded,
-          size: 36,
-          iconSize: 18,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        const _ProfileAvatar(),
-      ],
     );
   }
 }
@@ -125,9 +92,9 @@ class _InsightBanner extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.4,
-                  ),
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -178,8 +145,8 @@ class _SpendingDonutCard extends StatelessWidget {
                     Text(
                       'Total Spent',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
@@ -230,30 +197,35 @@ class _CategoryTile extends StatelessWidget {
                     Text(
                       '${data.transactionCount} Transactions',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    data.amountLabel,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxs),
-                  Text(
-                    '${data.percentLabel} of spend',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-                ],
+              SizedBox(
+                width: 104,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      data.amountLabel,
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      '${data.percentLabel} of spend',
+                      textAlign: TextAlign.right,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -263,50 +235,10 @@ class _CategoryTile extends StatelessWidget {
             height: 6,
             backgroundColor: Colors.white.withValues(alpha: 0.08),
             gradient: LinearGradient(
-              colors: [
-                data.color,
-                data.color.withValues(alpha: 0.72),
-              ],
+              colors: [data.color, data.color.withValues(alpha: 0.72)],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFEAF9DB),
-            Color(0xFF6FCF97),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFAFAF3),
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-        child: const Center(
-          child: Text(
-            'Y',
-            style: TextStyle(
-              color: Color(0xFF2B7A4B),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
       ),
     );
   }

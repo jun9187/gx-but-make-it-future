@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../models/goal_progress.dart';
 import '../models/spending_category.dart';
@@ -16,26 +15,10 @@ const cashReserveGoal = GoalProgress(
 );
 
 const spendingCategories = [
-  SpendingCategory(
-    label: 'Bills',
-    amount: 2200,
-    color: AppColors.purple,
-  ),
-  SpendingCategory(
-    label: 'Leisure',
-    amount: 1180,
-    color: AppColors.pink,
-  ),
-  SpendingCategory(
-    label: 'Home',
-    amount: 860,
-    color: AppColors.cyan,
-  ),
-  SpendingCategory(
-    label: 'Invest',
-    amount: 1320,
-    color: AppColors.emerald,
-  ),
+  SpendingCategory(label: 'Bills', amount: 2200, color: AppColors.purple),
+  SpendingCategory(label: 'Leisure', amount: 1180, color: AppColors.pink),
+  SpendingCategory(label: 'Home', amount: 860, color: AppColors.cyan),
+  SpendingCategory(label: 'Invest', amount: 1320, color: AppColors.emerald),
 ];
 
 const flowSignals = <String>[

@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
@@ -11,6 +12,9 @@ import '../../../shared/widgets/app_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/gradient_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
+import '../../cash_flow/presentation/cash_flow_screen.dart';
+import '../../flowguard/presentation/flowguard_screen.dart';
+import '../../future_home/presentation/future_home_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -36,8 +40,8 @@ class DashboardScreen extends StatelessWidget {
             eyebrow: 'Your money, made clearer',
             trailing: const IconCircle(
               icon: Icons.notifications_none_rounded,
-              size: 44,
-              iconSize: 20,
+              size: 40,
+              iconSize: 18,
             ),
           ).animate().fadeIn(duration: 240.ms).slideY(begin: 0.06, end: 0),
           _BalanceHeroCard(data: dashboard.hero)
@@ -45,9 +49,12 @@ class DashboardScreen extends StatelessWidget {
               .fadeIn(delay: 60.ms, duration: 280.ms)
               .slideY(begin: 0.08, end: 0),
           const SizedBox(height: AppSpacing.xl),
-          _CashFlowPreviewCard(
-            data: dashboard.cashFlow,
-            categories: dashboard.categories,
+          _DashboardCardLink(
+            onTap: () => context.go(CashFlowScreen.routePath),
+            child: _CashFlowPreviewCard(
+              data: dashboard.cashFlow,
+              categories: dashboard.categories,
+            ),
           ).animate().fadeIn(delay: 120.ms, duration: 280.ms),
           const SizedBox(height: AppSpacing.lg),
           Row(
@@ -64,22 +71,45 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
-                child: _MetricOverviewCard(
-                  title: 'FlowGuard',
-                  value: dashboard.flowGuardStatus,
-                  caption: dashboard.flowGuardCaption,
-                  icon: Icons.shield_rounded,
-                  iconBackground: const Color(0x247C4DFF),
-                  iconColor: const Color(0xFFB48CFF),
+                child: _DashboardCardLink(
+                  onTap: () => context.go(FlowguardScreen.routePath),
+                  child: _MetricOverviewCard(
+                    title: 'FlowGuard',
+                    value: dashboard.flowGuardStatus,
+                    caption: dashboard.flowGuardCaption,
+                    icon: Icons.shield_rounded,
+                    iconBackground: const Color(0x247C4DFF),
+                    iconColor: const Color(0xFFB48CFF),
+                  ),
                 ),
               ),
             ],
           ).animate().fadeIn(delay: 180.ms, duration: 280.ms),
           const SizedBox(height: AppSpacing.lg),
-          _FutureHomePreviewCard(data: dashboard.futureHome)
-              .animate()
-              .fadeIn(delay: 240.ms, duration: 320.ms),
+          _DashboardCardLink(
+            onTap: () => context.go(FutureHomeScreen.routePath),
+            child: _FutureHomePreviewCard(data: dashboard.futureHome),
+          ).animate().fadeIn(delay: 240.ms, duration: 320.ms),
         ],
+      ),
+    );
+  }
+}
+
+class _DashboardCardLink extends StatelessWidget {
+  const _DashboardCardLink({required this.child, required this.onTap});
+
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        onTap: onTap,
+        child: child,
       ),
     );
   }
@@ -97,10 +127,7 @@ class _BalanceHeroCard extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [
-          AppColors.heroStart,
-          AppColors.heroEnd,
-        ],
+        colors: [AppColors.heroStart, AppColors.heroEnd],
       ),
       borderColor: const Color(0x3DFFFFFF),
       boxShadow: const [
@@ -116,9 +143,9 @@ class _BalanceHeroCard extends StatelessWidget {
           Text(
             'CURRENT BALANCE',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.78),
-                  letterSpacing: 1.1,
-                ),
+              color: Colors.white.withValues(alpha: 0.78),
+              letterSpacing: 1.1,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Row(
@@ -128,9 +155,9 @@ class _BalanceHeroCard extends StatelessWidget {
                 child: Text(
                   formatCurrency(data.currentBalance),
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
               Padding(
@@ -138,8 +165,8 @@ class _BalanceHeroCard extends StatelessWidget {
                 child: Text(
                   'Safe to Spend',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.88),
-                      ),
+                    color: Colors.white.withValues(alpha: 0.88),
+                  ),
                 ),
               ),
             ],
@@ -150,10 +177,7 @@ class _BalanceHeroCard extends StatelessWidget {
             height: 7,
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             gradient: const LinearGradient(
-              colors: [
-                Colors.white,
-                Color(0xFFF7E8FF),
-              ],
+              colors: [Colors.white, Color(0xFFF7E8FF)],
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -163,15 +187,15 @@ class _BalanceHeroCard extends StatelessWidget {
                 child: Text(
                   'SPENT: ${formatCurrency(data.spentAmount)}',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.82),
-                      ),
+                    color: Colors.white.withValues(alpha: 0.82),
+                  ),
                 ),
               ),
               Text(
                 'LIMIT: ${formatCurrency(data.limitAmount)}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.82),
-                    ),
+                  color: Colors.white.withValues(alpha: 0.82),
+                ),
               ),
             ],
           ),
@@ -182,10 +206,7 @@ class _BalanceHeroCard extends StatelessWidget {
 }
 
 class _CashFlowPreviewCard extends StatelessWidget {
-  const _CashFlowPreviewCard({
-    required this.data,
-    required this.categories,
-  });
+  const _CashFlowPreviewCard({required this.data, required this.categories});
 
   final _CashFlowPreviewData data;
   final List<_CategoryData> categories;
@@ -207,8 +228,8 @@ class _CashFlowPreviewCard extends StatelessWidget {
               Text(
                 'View details',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(width: AppSpacing.xxs),
               const Icon(
@@ -273,10 +294,7 @@ class _CashFlowPreviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     for (final category in categories) ...[
-                      _LegendDot(
-                        label: category.label,
-                        color: category.color,
-                      ),
+                      _LegendDot(label: category.label, color: category.color),
                       const SizedBox(height: AppSpacing.sm),
                     ],
                   ],
@@ -288,9 +306,9 @@ class _CashFlowPreviewCard extends StatelessWidget {
           Text(
             data.insight,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.45,
-                ),
+              color: AppColors.textSecondary,
+              height: 1.45,
+            ),
           ),
         ],
       ),
@@ -334,10 +352,7 @@ class _MetricOverviewCard extends StatelessWidget {
             style: Theme.of(context).textTheme.labelSmall,
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text(value, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: AppSpacing.xs),
           Text(
             caption,
@@ -359,7 +374,7 @@ class _FutureHomePreviewCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.card),
       child: SizedBox(
-        height: 158,
+        height: 146,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -368,10 +383,7 @@ class _FutureHomePreviewCard extends StatelessWidget {
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0xFFDFC4A6),
-                    Color(0xFF8A5B40),
-                  ],
+                  colors: [Color(0xFFDFC4A6), Color(0xFF8A5B40)],
                 ),
                 border: Border.all(color: AppColors.stroke),
               ),
@@ -414,10 +426,16 @@ class _FutureHomePreviewCard extends StatelessWidget {
                             ),
                             const SizedBox(width: AppSpacing.xs),
                             Text(
+                              'REWARD SPACE',
+                              style: Theme.of(context).textTheme.labelSmall
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.62),
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
                               data.title,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
+                              style: Theme.of(context).textTheme.titleMedium
                                   ?.copyWith(color: Colors.white),
                             ),
                           ],
@@ -425,11 +443,11 @@ class _FutureHomePreviewCard extends StatelessWidget {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           data.subtitle,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.84),
-                                    height: 1.35,
-                                  ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.84),
+                                height: 1.35,
+                              ),
                         ),
                       ],
                     ),
@@ -456,10 +474,9 @@ class _FutureHomePreviewCard extends StatelessWidget {
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           '${data.coinBalance} Coins',
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: Colors.white,
-                                  ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.labelLarge?.copyWith(color: Colors.white),
                         ),
                       ],
                     ),
@@ -475,10 +492,7 @@ class _FutureHomePreviewCard extends StatelessWidget {
 }
 
 class _LegendDot extends StatelessWidget {
-  const _LegendDot({
-    required this.label,
-    required this.color,
-  });
+  const _LegendDot({required this.label, required this.color});
 
   final String label;
   final Color color;
@@ -499,9 +513,9 @@ class _LegendDot extends StatelessWidget {
         Expanded(
           child: Text(
             label.toUpperCase(),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
           ),
         ),
       ],
@@ -620,10 +634,7 @@ class _DashboardHeroData {
 }
 
 class _CashFlowPreviewData {
-  const _CashFlowPreviewData({
-    required this.totalSpent,
-    required this.insight,
-  });
+  const _CashFlowPreviewData({required this.totalSpent, required this.insight});
 
   final double totalSpent;
   final String insight;
@@ -664,26 +675,10 @@ const _dashboardData = _DashboardData(
     insight: 'Your spending is 12% lower than last week. Great job!',
   ),
   categories: [
-    _CategoryData(
-      label: 'Transfer',
-      share: 0.40,
-      color: Color(0xFF7A3FF2),
-    ),
-    _CategoryData(
-      label: 'Services',
-      share: 0.30,
-      color: Color(0xFFFFB38B),
-    ),
-    _CategoryData(
-      label: 'Shops',
-      share: 0.15,
-      color: Color(0xFFE3008C),
-    ),
-    _CategoryData(
-      label: 'Food & Drink',
-      share: 0.15,
-      color: Color(0xFFFFB9D4),
-    ),
+    _CategoryData(label: 'Transfer', share: 0.40, color: Color(0xFF7A3FF2)),
+    _CategoryData(label: 'Services', share: 0.30, color: Color(0xFFFFB38B)),
+    _CategoryData(label: 'Shops', share: 0.15, color: Color(0xFFE3008C)),
+    _CategoryData(label: 'Food & Drink', share: 0.15, color: Color(0xFFFFB9D4)),
   ],
   streakWeeks: 3,
   flowGuardStatus: 'Active',

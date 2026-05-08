@@ -5,16 +5,12 @@ import 'package:future_flow/app.dart';
 
 void main() {
   testWidgets('renders FutureFlow dashboard shell', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: FutureFlowApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: FutureFlowApp()));
 
     await tester.pumpAndSettle();
 
     expect(find.text('FutureFlow'), findsOneWidget);
-    expect(find.text('Dashboard'), findsOneWidget);
-    expect(find.text('Shape tomorrow with clarity.'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Your money, made clearer'), findsOneWidget);
   });
 }

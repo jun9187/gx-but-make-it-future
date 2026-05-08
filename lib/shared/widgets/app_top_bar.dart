@@ -28,16 +28,10 @@ class AppTopBar extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (eyebrow != null) ...[
-                  Text(
-                    eyebrow!,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
+                  Text(eyebrow!, style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: AppSpacing.xs),
                 ],
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
+                Text(title, style: Theme.of(context).textTheme.headlineMedium),
               ],
             ),
           ),

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../shared/widgets/app_progress_bar.dart';
+import '../../../shared/widgets/feature_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/gradient_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
@@ -30,25 +30,22 @@ class FutureFlowScreen extends StatelessWidget {
           120,
         ),
         children: [
-          const _FutureFlowTopBar()
-              .animate()
-              .fadeIn(duration: 220.ms)
-              .slideY(begin: 0.05, end: 0),
+          const FeatureTopBar(
+            title: 'Future Flow',
+          ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.05, end: 0),
           const SizedBox(height: AppSpacing.xl),
           _FutureFlowHeroCard(data: screenData.hero)
               .animate()
               .fadeIn(delay: 60.ms, duration: 280.ms)
               .slideY(begin: 0.08, end: 0),
           const SizedBox(height: AppSpacing.xl),
-          const SectionHeader(
-            title: 'Recent Activity',
-            actionLabel: 'See all',
-          ).animate().fadeIn(delay: 120.ms, duration: 240.ms),
+          const SectionHeader(title: 'Recent Activity', actionLabel: 'See all'),
           const SizedBox(height: AppSpacing.md),
           for (var i = 0; i < screenData.activities.length; i++) ...[
-            _TransactionTile(data: screenData.activities[i])
-                .animate()
-                .fadeIn(delay: Duration(milliseconds: 180 + (i * 60)), duration: 260.ms),
+            _TransactionTile(data: screenData.activities[i]).animate().fadeIn(
+              delay: Duration(milliseconds: 180 + (i * 60)),
+              duration: 260.ms,
+            ),
             if (i != screenData.activities.length - 1)
               const SizedBox(height: AppSpacing.md),
           ],
@@ -56,48 +53,18 @@ class FutureFlowScreen extends StatelessWidget {
           const SectionHeader(
             title: 'Future Commitments',
             actionLabel: 'See all',
-          ).animate().fadeIn(delay: 280.ms, duration: 240.ms),
+          ),
           const SizedBox(height: AppSpacing.md),
           for (var i = 0; i < screenData.commitments.length; i++) ...[
-            _CommitmentTile(data: screenData.commitments[i])
-                .animate()
-                .fadeIn(delay: Duration(milliseconds: 320 + (i * 60)), duration: 260.ms),
+            _CommitmentTile(data: screenData.commitments[i]).animate().fadeIn(
+              delay: Duration(milliseconds: 320 + (i * 60)),
+              duration: 260.ms,
+            ),
             if (i != screenData.commitments.length - 1)
               const SizedBox(height: AppSpacing.md),
           ],
         ],
       ),
-    );
-  }
-}
-
-class _FutureFlowTopBar extends StatelessWidget {
-  const _FutureFlowTopBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const IconCircle(
-          icon: Icons.arrow_back_rounded,
-          size: 36,
-          iconSize: 18,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Text(
-            'Future Flow',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-        ),
-        const IconCircle(
-          icon: Icons.notifications_none_rounded,
-          size: 36,
-          iconSize: 18,
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        const _ProfileAvatar(),
-      ],
     );
   }
 }
@@ -114,10 +81,7 @@ class _FutureFlowHeroCard extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [
-          AppColors.heroStart,
-          AppColors.heroEnd,
-        ],
+        colors: [AppColors.heroStart, AppColors.heroEnd],
       ),
       borderColor: const Color(0x40FFFFFF),
       boxShadow: const [
@@ -133,32 +97,32 @@ class _FutureFlowHeroCard extends StatelessWidget {
           Text(
             'CURRENT BALANCE',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.82),
-                  letterSpacing: 1.2,
-                ),
+              color: Colors.white.withValues(alpha: 0.82),
+              letterSpacing: 1.2,
+            ),
           ),
           const SizedBox(height: AppSpacing.xxs),
           Text(
             data.obscuredBalance,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.88),
-                ),
+              color: Colors.white.withValues(alpha: 0.88),
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             'SAFE TO SPEND',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.84),
-                  letterSpacing: 1.1,
-                ),
+              color: Colors.white.withValues(alpha: 0.84),
+              letterSpacing: 1.1,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             formatCurrency(data.safeToSpend),
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           _ProgressInfoRow(
@@ -198,29 +162,19 @@ class _ProgressInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: Colors.white.withValues(alpha: 0.82),
-          letterSpacing: 1.0,
-        );
+      color: Colors.white.withValues(alpha: 0.82),
+      letterSpacing: 1.0,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Expanded(
-              child: Text(label, style: labelStyle),
-            ),
+            Expanded(child: Text(label, style: labelStyle)),
             if (leftValue.isNotEmpty)
-              Text(
-                leftValue,
-                textAlign: TextAlign.right,
-                style: labelStyle,
-              ),
-            Text(
-              rightValue,
-              textAlign: TextAlign.right,
-              style: labelStyle,
-            ),
+              Text(leftValue, textAlign: TextAlign.right, style: labelStyle),
+            Text(rightValue, textAlign: TextAlign.right, style: labelStyle),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -229,10 +183,7 @@ class _ProgressInfoRow extends StatelessWidget {
           height: 6,
           backgroundColor: Colors.white.withValues(alpha: 0.18),
           gradient: const LinearGradient(
-            colors: [
-              Colors.white,
-              Color(0xFFF7E8FF),
-            ],
+            colors: [Colors.white, Color(0xFFF7E8FF)],
           ),
         ),
       ],
@@ -274,22 +225,25 @@ class _TransactionTile extends StatelessWidget {
                 Text(
                   '${data.subtitle} • ${data.timeLabel}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: AppSpacing.md),
-          Text(
-            data.amountLabel,
-            textAlign: TextAlign.right,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: data.isPositive
-                      ? const Color(0xFFFFC96B)
-                      : AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
+          SizedBox(
+            width: 104,
+            child: Text(
+              data.amountLabel,
+              textAlign: TextAlign.right,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: data.isPositive
+                    ? const Color(0xFFFFC96B)
+                    : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
         ],
       ),
@@ -331,8 +285,8 @@ class _CommitmentTile extends StatelessWidget {
                 Text(
                   data.subtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -344,49 +298,12 @@ class _CommitmentTile extends StatelessWidget {
               data.amountLabel,
               textAlign: TextAlign.right,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFFEAF9DB),
-            Color(0xFF6FCF97),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFFFAFAF3),
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-        ),
-        child: const Center(
-          child: Text(
-            'Y',
-            style: TextStyle(
-              color: Color(0xFF2B7A4B),
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -5,8 +5,6 @@ import '../../cash_flow/presentation/cash_flow_screen.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
 import '../../flowguard/presentation/flowguard_screen.dart';
 import '../../future_flow/presentation/future_flow_screen.dart';
-import '../../future_home/presentation/future_home_screen.dart';
-import '../../shop/presentation/shop_screen.dart';
 
 class ShellDestination {
   const ShellDestination({
@@ -23,34 +21,24 @@ class ShellDestination {
 final shellDestinationsProvider = Provider<List<ShellDestination>>((ref) {
   return const [
     ShellDestination(
-      label: 'Dashboard',
-      icon: Icons.space_dashboard_rounded,
+      label: 'Home',
+      icon: Icons.home_outlined,
       routePath: DashboardScreen.routePath,
     ),
     ShellDestination(
-      label: 'FutureFlow',
+      label: 'Flow',
       icon: Icons.auto_graph_rounded,
       routePath: FutureFlowScreen.routePath,
     ),
     ShellDestination(
-      label: 'Cash Flow',
+      label: 'Cash',
       icon: Icons.pie_chart_rounded,
       routePath: CashFlowScreen.routePath,
     ),
     ShellDestination(
-      label: 'FlowGuard',
+      label: 'Guard',
       icon: Icons.security_rounded,
       routePath: FlowguardScreen.routePath,
-    ),
-    ShellDestination(
-      label: 'Future Home',
-      icon: Icons.home_work_rounded,
-      routePath: FutureHomeScreen.routePath,
-    ),
-    ShellDestination(
-      label: 'Shop',
-      icon: Icons.shopping_bag_rounded,
-      routePath: ShopScreen.routePath,
     ),
   ];
 });

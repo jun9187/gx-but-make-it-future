@@ -13,6 +13,7 @@ class IconCircle extends StatelessWidget {
     this.color = AppColors.textPrimary,
     this.backgroundColor,
     this.gradient,
+    this.onTap,
   }) : assert(icon != null || child != null);
 
   final IconData? icon;
@@ -22,20 +23,36 @@ class IconCircle extends StatelessWidget {
   final Color color;
   final Color? backgroundColor;
   final Gradient? gradient;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final decoration = BoxDecoration(
+      color: backgroundColor ?? AppColors.surfaceElevated,
+      gradient: gradient,
+      borderRadius: BorderRadius.circular(AppRadius.icon),
+      border: Border.all(color: AppColors.stroke),
+    );
+
+    final iconBody = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.surfaceElevated,
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(AppRadius.icon),
-        border: Border.all(color: AppColors.stroke),
-      ),
+      decoration: decoration,
       alignment: Alignment.center,
       child: child ?? Icon(icon, size: iconSize, color: color),
+    );
+
+    if (onTap == null) {
+      return iconBody;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.icon),
+        onTap: onTap,
+        child: iconBody,
+      ),
     );
   }
 }
