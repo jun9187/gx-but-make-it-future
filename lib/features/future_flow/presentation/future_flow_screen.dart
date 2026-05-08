@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../data/mock/app_mock_data.dart';
@@ -43,29 +44,41 @@ class FutureFlowScreen extends StatelessWidget {
               .animate()
               .fadeIn(delay: 60.ms, duration: 280.ms)
               .slideY(begin: 0.08, end: 0),
-          const SizedBox(height: AppSpacing.xl),
-          const SectionHeader(title: 'Recent Activity', actionLabel: 'See all'),
-          const SizedBox(height: AppSpacing.md),
-          for (var i = 0; i < screenData.activities.length; i++) ...[
-            _TransactionTile(data: screenData.activities[i]).animate().fadeIn(
-              delay: Duration(milliseconds: 180 + (i * 60)),
-              duration: 260.ms,
-            ),
-            if (i != screenData.activities.length - 1)
-              const SizedBox(height: AppSpacing.md),
-          ],
+          const SizedBox(height: AppSpacing.lg),
+          _DecisionSummaryRow(
+            data: screenData,
+          ).animate().fadeIn(delay: 120.ms, duration: 280.ms),
+          const SizedBox(height: AppSpacing.lg),
+          _PredictionCard(data: screenData)
+              .animate()
+              .fadeIn(delay: 180.ms, duration: 280.ms)
+              .slideY(begin: 0.05, end: 0),
           const SizedBox(height: AppSpacing.xl),
           const SectionHeader(
-            title: 'Future Commitments',
-            actionLabel: 'See all',
+            title: 'Upcoming Commitments',
+            subtitle: 'Protected before you make today’s spending decision.',
           ),
           const SizedBox(height: AppSpacing.md),
           for (var i = 0; i < screenData.commitments.length; i++) ...[
             _CommitmentTile(data: screenData.commitments[i]).animate().fadeIn(
-              delay: Duration(milliseconds: 320 + (i * 60)),
+              delay: Duration(milliseconds: 260 + (i * 60)),
               duration: 260.ms,
             ),
             if (i != screenData.commitments.length - 1)
+              const SizedBox(height: AppSpacing.md),
+          ],
+          const SizedBox(height: AppSpacing.xl),
+          const SectionHeader(
+            title: 'Recent Activity',
+            subtitle: 'Latest signals shaping your safe-to-spend forecast.',
+          ),
+          const SizedBox(height: AppSpacing.md),
+          for (var i = 0; i < screenData.activities.length; i++) ...[
+            _TransactionTile(data: screenData.activities[i]).animate().fadeIn(
+              delay: Duration(milliseconds: 420 + (i * 60)),
+              duration: 260.ms,
+            ),
+            if (i != screenData.activities.length - 1)
               const SizedBox(height: AppSpacing.md),
           ],
         ],
@@ -123,7 +136,7 @@ class _FutureFlowHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'SAFE TO SPEND',
+            'WEEKLY SAFE TO SPEND',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Colors.white.withValues(alpha: 0.84),
               letterSpacing: 1.1,
@@ -140,7 +153,6 @@ class _FutureFlowHeroCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xl),
           _ProgressInfoRow(
             label: 'WEEKLY SPENT',
-            leftValue: '',
             rightValue:
                 '${formatCurrency(data.weeklySpentCurrent)} / ${formatCurrency(data.weeklySpentLimit)}',
             progress: data.weeklySpentProgress,
@@ -148,7 +160,6 @@ class _FutureFlowHeroCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           _ProgressInfoRow(
             label: 'TODAY\'S LIMIT',
-            leftValue: '',
             rightValue:
                 '${formatCurrency(data.todayLimitCurrent)} / ${formatCurrency(data.todayLimitMax)}',
             progress: data.todayLimitProgress,
@@ -162,13 +173,11 @@ class _FutureFlowHeroCard extends StatelessWidget {
 class _ProgressInfoRow extends StatelessWidget {
   const _ProgressInfoRow({
     required this.label,
-    required this.leftValue,
     required this.rightValue,
     required this.progress,
   });
 
   final String label;
-  final String leftValue;
   final String rightValue;
   final double progress;
 
@@ -185,21 +194,177 @@ class _ProgressInfoRow extends StatelessWidget {
         Row(
           children: [
             Expanded(child: Text(label, style: labelStyle)),
-            if (leftValue.isNotEmpty)
-              Text(leftValue, textAlign: TextAlign.right, style: labelStyle),
             Text(rightValue, textAlign: TextAlign.right, style: labelStyle),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
         AppProgressBar(
           value: progress,
-          height: 6,
-          backgroundColor: Colors.white.withValues(alpha: 0.18),
-          gradient: const LinearGradient(
-            colors: [Colors.white, Color(0xFFF7E8FF)],
+          height: 8,
+          backgroundColor: const Color(0x44FFFFFF),
+          gradient: label == 'TODAY\'S LIMIT'
+              ? const LinearGradient(
+                  colors: [Color(0xFFFFA86A), Color(0xFFFF668F)],
+                )
+              : const LinearGradient(
+                  colors: [Color(0xFFFFD67C), Color(0xFFFF7FB7)],
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DecisionSummaryRow extends StatelessWidget {
+  const _DecisionSummaryRow({required this.data});
+
+  final FutureFlowScreenData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _SummaryCard(
+            title: 'Upcoming Commitments',
+            value: formatCurrency(data.upcomingCommitmentsTotal),
+            caption: 'Protected this week',
+            icon: Icons.event_note_rounded,
+            iconColor: const Color(0xFFFFC96B),
+            iconBackground: const Color(0x26FF9D5C),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: _SummaryCard(
+            title: 'Risk Level',
+            value: data.riskLevelLabel,
+            caption: 'Based on pace + commitments',
+            icon: Icons.shield_moon_rounded,
+            iconColor: const Color(0xFFCAA5FF),
+            iconBackground: const Color(0x247C4DFF),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({
+    required this.title,
+    required this.value,
+    required this.caption,
+    required this.icon,
+    required this.iconColor,
+    required this.iconBackground,
+  });
+
+  final String title;
+  final String value;
+  final String caption;
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBackground;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          IconCircle(
+            icon: icon,
+            size: 34,
+            iconSize: 16,
+            backgroundColor: iconBackground,
+            color: iconColor,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(title, style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(height: AppSpacing.xs),
+          Text(value, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            caption,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PredictionCard extends StatelessWidget {
+  const _PredictionCard({required this.data});
+
+  final FutureFlowScreenData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const IconCircle(
+                icon: Icons.show_chart_rounded,
+                size: 34,
+                iconSize: 16,
+                backgroundColor: Color(0x247C4DFF),
+                color: Color(0xFFD7C4FF),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  'Predicted End-Of-Week Spending',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            formatCurrency(data.predictedEndWeekSpending),
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            data.riskLevelCaption,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.stroke),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Projected week-end balance',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Text(
+                  formatCurrency(data.predictedEndWeekBalance),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

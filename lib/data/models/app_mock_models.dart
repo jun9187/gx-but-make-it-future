@@ -44,11 +44,21 @@ class CashFlowOverviewData {
 class FutureFlowScreenData {
   const FutureFlowScreenData({
     required this.hero,
+    required this.upcomingCommitmentsTotal,
+    required this.riskLevelLabel,
+    required this.riskLevelCaption,
+    required this.predictedEndWeekSpending,
+    required this.predictedEndWeekBalance,
     required this.activities,
     required this.commitments,
   });
 
   final FutureFlowHeroData hero;
+  final double upcomingCommitmentsTotal;
+  final String riskLevelLabel;
+  final String riskLevelCaption;
+  final double predictedEndWeekSpending;
+  final double predictedEndWeekBalance;
   final List<ActivityEntryData> activities;
   final List<CommitmentEntryData> commitments;
 }
@@ -153,13 +163,17 @@ class CashFlowOverviewScreenData {
 class FlowGuardScreenData {
   const FlowGuardScreenData({
     required this.status,
+    required this.signals,
     required this.guardrails,
     required this.recoveryNudge,
+    required this.recoveryActions,
   });
 
   final FlowGuardStatusData status;
+  final List<FlowGuardSignalData> signals;
   final List<FlowGuardOptionData> guardrails;
   final RecoveryNudgeData recoveryNudge;
+  final List<FlowGuardRecoveryActionData> recoveryActions;
 }
 
 class FlowGuardStatusData {
@@ -167,13 +181,31 @@ class FlowGuardStatusData {
     required this.spentToday,
     required this.safeLimit,
     required this.overLimitAmount,
+    required this.riskLevelLabel,
+    required this.riskSummary,
   });
 
   final double spentToday;
   final double safeLimit;
   final double overLimitAmount;
+  final String riskLevelLabel;
+  final String riskSummary;
 
   double get progress => spentToday == 0 ? 0 : safeLimit / spentToday;
+}
+
+class FlowGuardSignalData {
+  const FlowGuardSignalData({
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.accentColor,
+  });
+
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color accentColor;
 }
 
 enum FlowGuardOptionState { standard, active, locked }
@@ -206,6 +238,20 @@ class RecoveryNudgeData {
   final String message;
 }
 
+class FlowGuardRecoveryActionData {
+  const FlowGuardRecoveryActionData({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.accentColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color accentColor;
+}
+
 class RewardStatusData {
   const RewardStatusData({
     required this.headerTitle,
@@ -226,6 +272,53 @@ class RewardStatusData {
   final int streakWeeks;
   final double autoSavedAmount;
   final double savingsPocketBalance;
+}
+
+class SavingsPocketData {
+  const SavingsPocketData({
+    required this.title,
+    required this.amount,
+    required this.imageGradient,
+    this.badgeLabel,
+    this.badgeColor,
+  });
+
+  final String title;
+  final double amount;
+  final Gradient imageGradient;
+  final String? badgeLabel;
+  final Color? badgeColor;
+}
+
+class SavingsPocketsScreenData {
+  const SavingsPocketsScreenData({
+    required this.totalPocketBalance,
+    required this.pockets,
+    required this.futureFlowPockets,
+  });
+
+  final double totalPocketBalance;
+  final List<SavingsPocketData> pockets;
+  final List<SavingsPocketData> futureFlowPockets;
+}
+
+class AutoSaveHistoryPoint {
+  const AutoSaveHistoryPoint({required this.weekLabel, required this.amount});
+
+  final String weekLabel;
+  final double amount;
+}
+
+class AutoSaveHistoryScreenData {
+  const AutoSaveHistoryScreenData({
+    required this.currentWeekAmount,
+    required this.insight,
+    required this.history,
+  });
+
+  final double currentWeekAmount;
+  final String insight;
+  final List<AutoSaveHistoryPoint> history;
 }
 
 class ShopScreenData {
@@ -307,30 +400,49 @@ class FutureHomeDemoState {
     required this.coins,
     required this.ownedItemIds,
     required this.placedItemIds,
+    required this.placedItemOffsets,
+    required this.editingItemId,
+    required this.draftOffset,
     required this.lastUnlockedItemId,
     required this.lastPlacedItemId,
     required this.placementVersion,
+    required this.inventoryRequestVersion,
   });
 
   final int coins;
   final Set<String> ownedItemIds;
   final Set<String> placedItemIds;
+  final Map<String, Offset> placedItemOffsets;
+  final String? editingItemId;
+  final Offset? draftOffset;
   final String? lastUnlockedItemId;
   final String? lastPlacedItemId;
   final int placementVersion;
+  final int inventoryRequestVersion;
 
   FutureHomeDemoState copyWith({
     int? coins,
     Set<String>? ownedItemIds,
     Set<String>? placedItemIds,
+    Map<String, Offset>? placedItemOffsets,
+    Object? editingItemId = _sentinel,
+    Object? draftOffset = _sentinel,
     Object? lastUnlockedItemId = _sentinel,
     Object? lastPlacedItemId = _sentinel,
     int? placementVersion,
+    int? inventoryRequestVersion,
   }) {
     return FutureHomeDemoState(
       coins: coins ?? this.coins,
       ownedItemIds: ownedItemIds ?? this.ownedItemIds,
       placedItemIds: placedItemIds ?? this.placedItemIds,
+      placedItemOffsets: placedItemOffsets ?? this.placedItemOffsets,
+      editingItemId: identical(editingItemId, _sentinel)
+          ? this.editingItemId
+          : editingItemId as String?,
+      draftOffset: identical(draftOffset, _sentinel)
+          ? this.draftOffset
+          : draftOffset as Offset?,
       lastUnlockedItemId: identical(lastUnlockedItemId, _sentinel)
           ? this.lastUnlockedItemId
           : lastUnlockedItemId as String?,
@@ -338,6 +450,8 @@ class FutureHomeDemoState {
           ? this.lastPlacedItemId
           : lastPlacedItemId as String?,
       placementVersion: placementVersion ?? this.placementVersion,
+      inventoryRequestVersion:
+          inventoryRequestVersion ?? this.inventoryRequestVersion,
     );
   }
 }

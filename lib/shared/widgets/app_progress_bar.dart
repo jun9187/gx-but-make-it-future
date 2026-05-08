@@ -25,25 +25,35 @@ class AppProgressBar extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.pill),
       child: SizedBox(
         height: height,
-        child: Stack(
-          children: [
-            ColoredBox(
-              color: backgroundColor ?? Colors.white.withValues(alpha: 0.08),
-              child: const SizedBox.expand(),
-            ),
-            FractionallySizedBox(
-              widthFactor: clampedValue,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient:
-                      gradient ??
-                      const LinearGradient(
-                        colors: [AppColors.heroStart, AppColors.heroEnd],
-                      ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              children: [
+                ColoredBox(
+                  color:
+                      backgroundColor ?? Colors.white.withValues(alpha: 0.08),
+                  child: const SizedBox.expand(),
                 ),
-              ),
-            ),
-          ],
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: SizedBox(
+                    width: constraints.maxWidth * clampedValue,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient:
+                            gradient ??
+                            const LinearGradient(
+                              colors: [AppColors.heroStart, AppColors.heroEnd],
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

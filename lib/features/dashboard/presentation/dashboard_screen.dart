@@ -16,7 +16,12 @@ import '../../../shared/widgets/gradient_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
 import '../../cash_flow/presentation/cash_flow_screen.dart';
 import '../../flowguard/presentation/flowguard_screen.dart';
+import '../../auto_save_history/presentation/auto_save_history_screen.dart';
+import '../../future_flow/presentation/future_flow_screen.dart';
 import '../../future_home/presentation/future_home_screen.dart';
+import '../../savings_pockets/presentation/savings_pockets_screen.dart';
+
+const double _shellBottomBarClearance = 96;
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -46,7 +51,10 @@ class DashboardScreen extends StatelessWidget {
               iconSize: 18,
             ),
           ).animate().fadeIn(duration: 240.ms).slideY(begin: 0.06, end: 0),
-          _BalanceHeroCard(data: dashboard.hero)
+          _DashboardCardLink(
+                onTap: () => context.push(FutureFlowScreen.routePath),
+                child: _BalanceHeroCard(data: dashboard.hero),
+              )
               .animate()
               .fadeIn(delay: 60.ms, duration: 280.ms)
               .slideY(begin: 0.08, end: 0),
@@ -60,17 +68,21 @@ class DashboardScreen extends StatelessWidget {
           ).animate().fadeIn(delay: 120.ms, duration: 280.ms),
           const SizedBox(height: AppSpacing.lg),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
                 child: _DashboardCardLink(
                   onTap: () => _showAutoSaveSheet(context),
-                  child: _MetricOverviewCard(
-                    title: 'Streak',
-                    value: '${dashboard.streakWeeks} Weeks',
-                    caption: 'Staying under safe-to-spend',
-                    icon: Icons.bolt_rounded,
-                    iconBackground: const Color(0x26FF9D5C),
-                    iconColor: const Color(0xFFFFC96B),
+                  child: SizedBox(
+                    height: 198,
+                    child: _MetricOverviewCard(
+                      title: 'Streak',
+                      value: '${dashboard.streakWeeks} Weeks',
+                      caption: 'Staying under safe-to-spend',
+                      icon: Icons.bolt_rounded,
+                      iconBackground: const Color(0x26FF9D5C),
+                      iconColor: const Color(0xFFFFC96B),
+                    ),
                   ),
                 ),
               ),
@@ -78,13 +90,16 @@ class DashboardScreen extends StatelessWidget {
               Expanded(
                 child: _DashboardCardLink(
                   onTap: () => context.push(FlowguardScreen.routePath),
-                  child: _MetricOverviewCard(
-                    title: 'FlowGuard',
-                    value: dashboard.flowGuardStatus,
-                    caption: dashboard.flowGuardCaption,
-                    icon: Icons.shield_rounded,
-                    iconBackground: const Color(0x247C4DFF),
-                    iconColor: const Color(0xFFB48CFF),
+                  child: SizedBox(
+                    height: 198,
+                    child: _MetricOverviewCard(
+                      title: 'FlowGuard',
+                      value: dashboard.flowGuardStatus,
+                      caption: dashboard.flowGuardCaption,
+                      icon: Icons.shield_rounded,
+                      iconBackground: const Color(0x247C4DFF),
+                      iconColor: const Color(0xFFB48CFF),
+                    ),
                   ),
                 ),
               ),
@@ -146,43 +161,27 @@ class _BalanceHeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'CURRENT BALANCE',
+            'WEEKLY SAFE TO SPEND',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Colors.white.withValues(alpha: 0.78),
               letterSpacing: 1.1,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Text(
-                  formatCurrency(data.currentBalance),
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text(
-                  'Safe to Spend',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withValues(alpha: 0.88),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            formatCurrency(data.currentBalance),
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           AppProgressBar(
             value: data.spentRatio,
-            height: 7,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            height: 8,
+            backgroundColor: const Color(0x44FFFFFF),
             gradient: const LinearGradient(
-              colors: [Colors.white, Color(0xFFF7E8FF)],
+              colors: [Color(0xFFFFD67C), Color(0xFFFF7FB7)],
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -359,9 +358,13 @@ class _MetricOverviewCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xs),
           Text(value, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: AppSpacing.xs),
-          Text(
-            caption,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.4),
+          Expanded(
+            child: Text(
+              caption,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(height: 1.4),
+            ),
           ),
         ],
       ),
@@ -528,52 +531,65 @@ Future<void> _showAutoSaveSheet(BuildContext context) async {
   await showModalBottomSheet<void>(
     context: context,
     backgroundColor: Colors.transparent,
+    useSafeArea: true,
+    isScrollControlled: true,
     builder: (context) {
-      return Container(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.xl,
-        ),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadius.xxl),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: _shellBottomBarClearance),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.xl,
           ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Auto-Save + Streak',
-              style: Theme.of(context).textTheme.headlineSmall,
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xxl),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Because you stayed within your weekly safe flow, FutureFlow auto-moved leftover money into your GX Savings Pocket.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.45,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Auto-Save + Streak',
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            _SheetMetric(
-              label: 'This week auto-saved',
-              value: formatCurrency(rewardStatusData.autoSavedAmount),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _SheetMetric(
-              label: 'Savings Pocket balance',
-              value: formatCurrency(rewardStatusData.savingsPocketBalance),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _SheetMetric(
-              label: 'Current streak',
-              value: '${rewardStatusData.streakWeeks} weeks',
-            ),
-          ],
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Because you stayed within your weekly safe flow, FutureFlow auto-moved leftover money into your GX Savings Pocket.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  height: 1.45,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _SheetMetric(
+                label: 'Previous week auto-saved',
+                value: formatCurrency(rewardStatusData.autoSavedAmount),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push(AutoSaveHistoryScreen.routePath);
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _SheetMetric(
+                label: 'Savings Pocket balance',
+                value: formatCurrency(rewardStatusData.savingsPocketBalance),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  context.push(SavingsPocketsScreen.routePath);
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _SheetMetric(
+                label: 'Current streak',
+                value: '${rewardStatusData.streakWeeks} weeks',
+              ),
+            ],
+          ),
         ),
       );
     },
@@ -581,33 +597,49 @@ Future<void> _showAutoSaveSheet(BuildContext context) async {
 }
 
 class _SheetMetric extends StatelessWidget {
-  const _SheetMetric({required this.label, required this.value});
+  const _SheetMetric({required this.label, required this.value, this.onTap});
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.stroke),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-            ),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.stroke),
           ),
-          const SizedBox(width: AppSpacing.md),
-          Text(value, style: Theme.of(context).textTheme.titleMedium),
-        ],
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Text(value, style: Theme.of(context).textTheme.titleMedium),
+              if (onTap != null) ...[
+                const SizedBox(width: AppSpacing.xs),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -31,6 +31,12 @@ const futureFlowScreenData = FutureFlowScreenData(
     todayLimitCurrent: 12.5,
     todayLimitMax: 42,
   ),
+  upcomingCommitmentsTotal: 315.90,
+  riskLevelLabel: 'Moderate Risk',
+  riskLevelCaption:
+      'You are still within your weekly safe flow, but rent and savings protection tighten your weekend flexibility.',
+  predictedEndWeekSpending: 368,
+  predictedEndWeekBalance: 74,
   activities: [
     ActivityEntryData(
       title: 'TNG Reload Transfer',
@@ -138,7 +144,32 @@ const flowGuardScreenData = FlowGuardScreenData(
     spentToday: 64,
     safeLimit: 42,
     overLimitAmount: 22,
+    riskLevelLabel: 'Elevated Risk',
+    riskSummary:
+        'FlowGuard detected fast spending pace plus emotionally risky patterns tonight.',
   ),
+  signals: [
+    FlowGuardSignalData(
+      title: 'Spending too fast',
+      description: 'RM64 spent by 8:40 PM, already RM22 above your safe pace.',
+      icon: Icons.speed_rounded,
+      accentColor: Color(0xFFFF8B7B),
+    ),
+    FlowGuardSignalData(
+      title: 'Repeated small payments',
+      description:
+          '4 small convenience and delivery transactions landed within 90 minutes.',
+      icon: Icons.receipt_long_rounded,
+      accentColor: Color(0xFFFFC96B),
+    ),
+    FlowGuardSignalData(
+      title: 'Late-night emotional trigger',
+      description:
+          'Recent browsing and food delivery timing matches your overspend pattern after 10 PM.',
+      icon: Icons.nightlight_round,
+      accentColor: Color(0xFFB48CFF),
+    ),
+  ],
   guardrails: [
     FlowGuardOptionData(
       title: 'Daily Flexible Spending',
@@ -169,18 +200,25 @@ const flowGuardScreenData = FlowGuardScreenData(
       state: FlowGuardOptionState.standard,
     ),
     FlowGuardOptionData(
-      title: 'Savings Goal Lock',
-      subtitle: 'RM100 protected',
+      title: 'Weekend Social Spending',
+      subtitle: 'RM80/week',
+      icon: Icons.celebration_outlined,
+      accentColor: Color(0xFF7280FF),
+      state: FlowGuardOptionState.standard,
+    ),
+    FlowGuardOptionData(
+      title: 'Emergency Buffer Lock',
+      subtitle: 'RM200 protected',
       icon: Icons.shield_outlined,
       accentColor: Color(0xFFC94F66),
       state: FlowGuardOptionState.locked,
     ),
     FlowGuardOptionData(
-      title: 'Weekend Social Spending',
-      subtitle: 'RM60/weekend',
-      icon: Icons.celebration_outlined,
-      accentColor: Color(0xFF7280FF),
-      state: FlowGuardOptionState.standard,
+      title: 'Night Calm Lock',
+      subtitle: '11 PM to 6 AM (self-control mode)',
+      icon: Icons.dark_mode_outlined,
+      accentColor: Color(0xFF6E7DFF),
+      state: FlowGuardOptionState.active,
     ),
   ],
   recoveryNudge: RecoveryNudgeData(
@@ -189,22 +227,120 @@ const flowGuardScreenData = FlowGuardScreenData(
     message:
         'You spent RM64 today, RM22 above pace. Trim tomorrow\'s spending limit to RM18 to stay on track?',
   ),
+  recoveryActions: [
+    FlowGuardRecoveryActionData(
+      title: 'Reduce tomorrow limit',
+      subtitle: 'Tighten flexible spend to RM18 for one day recovery.',
+      icon: Icons.tune_rounded,
+      accentColor: Color(0xFFCAA5FF),
+    ),
+    FlowGuardRecoveryActionData(
+      title: 'Pause food delivery',
+      subtitle: 'Lock delivery apps until 10 AM so the impulse window passes.',
+      icon: Icons.delivery_dining_outlined,
+      accentColor: Color(0xFFFFB877),
+    ),
+    FlowGuardRecoveryActionData(
+      title: 'Protect savings pocket',
+      subtitle: 'Keep RM100 savings goal untouched even if spending continues.',
+      icon: Icons.lock_rounded,
+      accentColor: Color(0xFF8FE2C5),
+    ),
+  ],
 );
 
 const rewardStatusData = RewardStatusData(
   headerTitle: 'Your Future Home',
   rewardTitle: 'Future Home',
   rewardSubtitle: 'Customize your digital sanctuary',
-  coins: 450,
+  coins: 500,
   nextUnlockCoins: 500,
   streakWeeks: 3,
   autoSavedAmount: 38,
   savingsPocketBalance: 188,
 );
 
+const savingsPocketsScreenData = SavingsPocketsScreenData(
+  totalPocketBalance: 1400,
+  pockets: [
+    SavingsPocketData(
+      title: 'FutureFlow Weekly Leftover',
+      amount: 38,
+      badgeLabel: 'This week',
+      badgeColor: Color(0xFF7C4DFF),
+      imageGradient: LinearGradient(
+        colors: [Color(0xFF7639FF), Color(0xFFD24EF5)],
+      ),
+    ),
+    SavingsPocketData(
+      title: 'Emergency',
+      amount: 200,
+      imageGradient: LinearGradient(
+        colors: [Color(0xFF7B52FF), Color(0xFFD2BCFF)],
+      ),
+    ),
+    SavingsPocketData(
+      title: 'Redang road trip',
+      amount: 100,
+      badgeLabel: '50%',
+      badgeColor: Color(0xFF1A1234),
+      imageGradient: LinearGradient(
+        colors: [Color(0xFFE0BE8D), Color(0xFFBFE6D0)],
+      ),
+    ),
+    SavingsPocketData(
+      title: 'Charity fund',
+      amount: 250,
+      badgeLabel: 'Goal completed!',
+      badgeColor: Color(0xFFD946EF),
+      imageGradient: LinearGradient(
+        colors: [Color(0xFFE84E97), Color(0xFF9D5CFF)],
+      ),
+    ),
+    SavingsPocketData(
+      title: 'Phuket!',
+      amount: 180,
+      imageGradient: LinearGradient(
+        colors: [Color(0xFFE8D8CF), Color(0xFFC9B1FF)],
+      ),
+    ),
+    SavingsPocketData(
+      title: 'Graduation party',
+      amount: 120,
+      imageGradient: LinearGradient(
+        colors: [Color(0xFFF4D9E2), Color(0xFFFF9CA0)],
+      ),
+    ),
+  ],
+  futureFlowPockets: [
+    SavingsPocketData(
+      title: 'Safe Spend Recovery Buffer',
+      amount: 150,
+      badgeLabel: 'Protected',
+      badgeColor: Color(0xFF18B981),
+      imageGradient: LinearGradient(
+        colors: [Color(0xFF254E63), Color(0xFF67C9A6)],
+      ),
+    ),
+  ],
+);
+
+const autoSaveHistoryScreenData = AutoSaveHistoryScreenData(
+  currentWeekAmount: 38,
+  insight:
+      'FutureFlow has auto-saved for 3 straight weeks because spending stayed below safe flow.',
+  history: [
+    AutoSaveHistoryPoint(weekLabel: 'W1', amount: 12),
+    AutoSaveHistoryPoint(weekLabel: 'W2', amount: 24),
+    AutoSaveHistoryPoint(weekLabel: 'W3', amount: 31),
+    AutoSaveHistoryPoint(weekLabel: 'W4', amount: 18),
+    AutoSaveHistoryPoint(weekLabel: 'W5', amount: 38),
+  ],
+);
+
 const shopScreenData = ShopScreenData(
   headerTitle: 'Mystery Shop',
-  coins: 450,
+  coins: 500,
   title: 'Unlock Your Style',
   subtitle: 'Choose a curated reward box to personalize your future space.',
   backLabel: 'BACK TO HOME',

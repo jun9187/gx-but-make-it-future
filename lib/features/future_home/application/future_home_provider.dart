@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/mock/app_mock_data.dart';
@@ -17,13 +19,22 @@ final futureHomeDemoProvider =
 class FutureHomeDemoController extends StateNotifier<FutureHomeDemoState> {
   FutureHomeDemoController() : super(_initialState);
 
+  static const Map<String, Offset> _defaultOffsets = {
+    'reading-lamp': Offset(116, 258),
+    'mochi-pet': Offset(222, 392),
+  };
+
   static final FutureHomeDemoState _initialState = FutureHomeDemoState(
     coins: rewardStatusData.coins,
     ownedItemIds: {'reading-lamp'},
     placedItemIds: <String>{},
+    placedItemOffsets: <String, Offset>{},
+    editingItemId: null,
+    draftOffset: null,
     lastUnlockedItemId: null,
     lastPlacedItemId: null,
     placementVersion: 0,
+    inventoryRequestVersion: 0,
   );
 
   bool canUnlock(ShopItemData item) {
@@ -43,18 +54,65 @@ class FutureHomeDemoController extends StateNotifier<FutureHomeDemoState> {
     return true;
   }
 
-  void placeItem(String itemId) {
+  void startPlacingItem(String itemId) {
+    if (!state.ownedItemIds.contains(itemId)) return;
+
+    state = state.copyWith(
+      editingItemId: itemId,
+      draftOffset:
+          state.placedItemOffsets[itemId] ??
+          _defaultOffsets[itemId] ??
+          Offset.zero,
+      lastPlacedItemId: null,
+    );
+  }
+
+  void updateDraftOffset(Offset offset) {
+    if (state.editingItemId == null) return;
+    state = state.copyWith(draftOffset: offset);
+  }
+
+  void placeItem() {
+    final itemId = state.editingItemId;
+    final draftOffset = state.draftOffset;
+    if (itemId == null || draftOffset == null) return;
+
     final placed = {...state.placedItemIds, itemId};
+    final offsets = {...state.placedItemOffsets, itemId: draftOffset};
     state = state.copyWith(
       placedItemIds: placed,
+      placedItemOffsets: offsets,
+      editingItemId: null,
+      draftOffset: null,
       lastPlacedItemId: itemId,
       placementVersion: state.placementVersion + 1,
     );
   }
 
+  void cancelPlacement() {
+    state = state.copyWith(
+      editingItemId: null,
+      draftOffset: null,
+      lastPlacedItemId: null,
+    );
+  }
+
   void removeItem(String itemId) {
     final placed = {...state.placedItemIds}..remove(itemId);
-    state = state.copyWith(placedItemIds: placed, lastPlacedItemId: null);
+    final offsets = {...state.placedItemOffsets}..remove(itemId);
+    state = state.copyWith(
+      placedItemIds: placed,
+      placedItemOffsets: offsets,
+      editingItemId: state.editingItemId == itemId ? null : state.editingItemId,
+      draftOffset: state.editingItemId == itemId ? null : state.draftOffset,
+      lastPlacedItemId: null,
+    );
+  }
+
+  void requestInventoryOpen() {
+    state = state.copyWith(
+      inventoryRequestVersion: state.inventoryRequestVersion + 1,
+    );
   }
 
   void resetDemo() {

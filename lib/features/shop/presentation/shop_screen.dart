@@ -388,13 +388,16 @@ class _GachaDialog extends ConsumerStatefulWidget {
 
 class _GachaDialogState extends ConsumerState<_GachaDialog> {
   bool _revealed = false;
-  bool _completed = false;
 
   @override
   void initState() {
     super.initState();
     Future<void>.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
+        final controller = ref.read(futureHomeDemoProvider.notifier);
+        if (controller.canUnlock(widget.item)) {
+          controller.unlockReward(widget.item);
+        }
         setState(() => _revealed = true);
       }
     });
@@ -403,12 +406,11 @@ class _GachaDialogState extends ConsumerState<_GachaDialog> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(futureHomeDemoProvider);
-    final controller = ref.read(futureHomeDemoProvider.notifier);
     final reward = rewardInventoryCatalog.firstWhere(
       (entry) => entry.id == widget.item.rewardItemId,
     );
     final isOwned = state.ownedItemIds.contains(reward.id);
-    final canAfford = controller.canUnlock(widget.item);
+    final canAfford = state.coins >= widget.item.price || isOwned;
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -432,13 +434,6 @@ class _GachaDialogState extends ConsumerState<_GachaDialog> {
                       reward: reward,
                       isOwned: isOwned,
                       canAfford: canAfford,
-                      completed: _completed,
-                      onConfirm: () {
-                        if (!_completed && canAfford) {
-                          controller.unlockReward(widget.item);
-                          setState(() => _completed = true);
-                        }
-                      },
                     ),
             ),
           ),
@@ -513,21 +508,15 @@ class _GachaRevealView extends StatelessWidget {
     required this.reward,
     required this.isOwned,
     required this.canAfford,
-    required this.completed,
-    required this.onConfirm,
   });
 
   final ShopItemData item;
   final RewardInventoryItemData reward;
   final bool isOwned;
   final bool canAfford;
-  final bool completed;
-  final VoidCallback onConfirm;
 
   @override
   Widget build(BuildContext context) {
-    final successState = completed || isOwned;
-
     return Column(
       key: const ValueKey('reveal'),
       mainAxisSize: MainAxisSize.min,
@@ -577,25 +566,18 @@ class _GachaRevealView extends StatelessWidget {
         const SizedBox(height: AppSpacing.xl),
         SizedBox(
           width: double.infinity,
-          child: successState
-              ? FilledButton(
-                  onPressed: () => context.go(FutureHomeScreen.routePath),
-                  child: const Text('Go To Inventory'),
-                )
-              : TextButton(
-                  onPressed: canAfford ? onConfirm : null,
-                  style: TextButton.styleFrom(
-                    backgroundColor: canAfford
-                        ? reward.accentColor.withValues(alpha: 0.18)
-                        : AppColors.surfaceElevated,
-                    foregroundColor: canAfford
-                        ? Colors.white
-                        : AppColors.textMuted,
-                  ),
-                  child: Text(
-                    canAfford ? 'Add To Inventory' : 'Not Enough Flow Coins',
-                  ),
-                ),
+          child: FilledButton(
+            onPressed: isOwned
+                ? () => Navigator.of(context).pop('inventory')
+                : null,
+            child: Text(
+              isOwned
+                  ? 'Go To Inventory'
+                  : canAfford
+                  ? 'Preparing Inventory...'
+                  : 'Not Enough Flow Coins',
+            ),
+          ),
         ),
       ],
     );
@@ -607,11 +589,18 @@ Future<void> _showGachaDialog(
   WidgetRef ref,
   ShopItemData item,
 ) async {
-  await showDialog<void>(
+  final nextAction = await showDialog<String>(
     context: context,
     barrierDismissible: true,
     builder: (context) => _GachaDialog(item: item),
   );
+
+  if (!context.mounted) return;
+
+  if (nextAction == 'inventory') {
+    ref.read(futureHomeDemoProvider.notifier).requestInventoryOpen();
+    _backToHome(context);
+  }
 }
 
 void _backToHome(BuildContext context) {
