@@ -49,16 +49,13 @@ class ProgressRing extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
+              Text(label, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 2),
               Text(
                 amount,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.muted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.muted),
               ),
             ],
           ),

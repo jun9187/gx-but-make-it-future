@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../data/mock/app_mock_data.dart';
+import '../../../data/models/app_mock_models.dart';
 import '../../../shared/widgets/app_progress_bar.dart';
 import '../../../shared/widgets/feature_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/gradient_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../dashboard/presentation/dashboard_screen.dart';
 
 class FutureFlowScreen extends StatelessWidget {
   const FutureFlowScreen({super.key});
@@ -19,7 +23,7 @@ class FutureFlowScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const screenData = _screenData;
+    const screenData = futureFlowScreenData;
 
     return SafeArea(
       child: ListView(
@@ -30,8 +34,9 @@ class FutureFlowScreen extends StatelessWidget {
           120,
         ),
         children: [
-          const FeatureTopBar(
+          FeatureTopBar(
             title: 'Future Flow',
+            onLeadingTap: () => _goBackOrDashboard(context),
           ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.05, end: 0),
           const SizedBox(height: AppSpacing.xl),
           _FutureFlowHeroCard(data: screenData.hero)
@@ -69,10 +74,18 @@ class FutureFlowScreen extends StatelessWidget {
   }
 }
 
+void _goBackOrDashboard(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+    return;
+  }
+  context.go(DashboardScreen.routePath);
+}
+
 class _FutureFlowHeroCard extends StatelessWidget {
   const _FutureFlowHeroCard({required this.data});
 
-  final _HeroData data;
+  final FutureFlowHeroData data;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +207,7 @@ class _ProgressInfoRow extends StatelessWidget {
 class _TransactionTile extends StatelessWidget {
   const _TransactionTile({required this.data});
 
-  final _TransactionData data;
+  final ActivityEntryData data;
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +267,7 @@ class _TransactionTile extends StatelessWidget {
 class _CommitmentTile extends StatelessWidget {
   const _CommitmentTile({required this.data});
 
-  final _CommitmentData data;
+  final CommitmentEntryData data;
 
   @override
   Widget build(BuildContext context) {
@@ -308,138 +321,3 @@ class _CommitmentTile extends StatelessWidget {
     );
   }
 }
-
-class _FutureFlowScreenData {
-  const _FutureFlowScreenData({
-    required this.hero,
-    required this.activities,
-    required this.commitments,
-  });
-
-  final _HeroData hero;
-  final List<_TransactionData> activities;
-  final List<_CommitmentData> commitments;
-}
-
-class _HeroData {
-  const _HeroData({
-    required this.obscuredBalance,
-    required this.safeToSpend,
-    required this.weeklySpentCurrent,
-    required this.weeklySpentLimit,
-    required this.todayLimitCurrent,
-    required this.todayLimitMax,
-  });
-
-  final String obscuredBalance;
-  final double safeToSpend;
-  final double weeklySpentCurrent;
-  final double weeklySpentLimit;
-  final double todayLimitCurrent;
-  final double todayLimitMax;
-
-  double get weeklySpentProgress =>
-      weeklySpentLimit == 0 ? 0 : weeklySpentCurrent / weeklySpentLimit;
-
-  double get todayLimitProgress =>
-      todayLimitMax == 0 ? 0 : todayLimitCurrent / todayLimitMax;
-}
-
-class _TransactionData {
-  const _TransactionData({
-    required this.title,
-    required this.subtitle,
-    required this.timeLabel,
-    required this.amountLabel,
-    required this.icon,
-    required this.iconBackground,
-    required this.iconColor,
-    required this.isPositive,
-  });
-
-  final String title;
-  final String subtitle;
-  final String timeLabel;
-  final String amountLabel;
-  final IconData icon;
-  final Color iconBackground;
-  final Color iconColor;
-  final bool isPositive;
-}
-
-class _CommitmentData {
-  const _CommitmentData({
-    required this.title,
-    required this.subtitle,
-    required this.amountLabel,
-    required this.icon,
-    required this.iconBackground,
-    required this.iconColor,
-  });
-
-  final String title;
-  final String subtitle;
-  final String amountLabel;
-  final IconData icon;
-  final Color iconBackground;
-  final Color iconColor;
-}
-
-const _screenData = _FutureFlowScreenData(
-  hero: _HeroData(
-    obscuredBalance: 'RM ****',
-    safeToSpend: 142,
-    weeklySpentCurrent: 258,
-    weeklySpentLimit: 400,
-    todayLimitCurrent: 12.5,
-    todayLimitMax: 42,
-  ),
-  activities: [
-    _TransactionData(
-      title: 'Starbucks',
-      subtitle: 'Food & Drinks',
-      timeLabel: 'Today',
-      amountLabel: '-RM24.50',
-      icon: Icons.local_cafe_outlined,
-      iconBackground: Color(0x247C4DFF),
-      iconColor: Color(0xFFB48CFF),
-      isPositive: false,
-    ),
-    _TransactionData(
-      title: 'Salary',
-      subtitle: 'Income',
-      timeLabel: 'Yesterday',
-      amountLabel: '+RM4,500.00',
-      icon: Icons.account_balance_wallet_outlined,
-      iconBackground: Color(0x245C4DFF),
-      iconColor: Color(0xFFD6C2FF),
-      isPositive: true,
-    ),
-  ],
-  commitments: [
-    _CommitmentData(
-      title: 'Rent',
-      subtitle: 'Due in 4 days',
-      amountLabel: 'RM200.00',
-      icon: Icons.home_outlined,
-      iconBackground: Color(0x24FF9D5C),
-      iconColor: Color(0xFFFFC96B),
-    ),
-    _CommitmentData(
-      title: 'Weekly Essentials',
-      subtitle: 'Budget lane',
-      amountLabel: 'RM180.00',
-      icon: Icons.shopping_cart_outlined,
-      iconBackground: Color(0x24FF4FD8),
-      iconColor: Color(0xFFFF9BE7),
-    ),
-    _CommitmentData(
-      title: 'Savings Goal',
-      subtitle: 'Personal Target',
-      amountLabel: 'RM100.00',
-      icon: Icons.shield_outlined,
-      iconBackground: Color(0x247C4DFF),
-      iconColor: Color(0xFFCFAEFF),
-    ),
-  ],
-);

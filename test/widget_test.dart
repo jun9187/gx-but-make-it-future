@@ -9,7 +9,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('FutureFlow'), findsOneWidget);
+    expect(find.text('FutureFlow'), findsNWidgets(2));
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Your money, made clearer'), findsOneWidget);
   });

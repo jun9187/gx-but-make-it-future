@@ -35,7 +35,8 @@ class AppProgressBar extends StatelessWidget {
               widthFactor: clampedValue,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: gradient ??
+                  gradient:
+                      gradient ??
                       const LinearGradient(
                         colors: [AppColors.heroStart, AppColors.heroEnd],
                       ),

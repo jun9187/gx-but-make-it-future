@@ -15,56 +15,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: DashboardScreen.routePath,
     routes: [
-      GoRoute(
-        path: FutureHomeScreen.routePath,
-        name: FutureHomeScreen.routeName,
-        builder: (context, state) => const FutureHomeScreen(),
-      ),
-      GoRoute(
-        path: ShopScreen.routePath,
-        name: ShopScreen.routeName,
-        builder: (context, state) => const ShopScreen(),
-      ),
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return AppShell(navigationShell: navigationShell);
-        },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: DashboardScreen.routePath,
-                name: DashboardScreen.routeName,
-                builder: (context, state) => const DashboardScreen(),
-              ),
-            ],
+      ShellRoute(
+        builder: (context, state, child) => AppShell(child: child),
+        routes: [
+          GoRoute(
+            path: DashboardScreen.routePath,
+            name: DashboardScreen.routeName,
+            builder: (context, state) => const DashboardScreen(),
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: FutureFlowScreen.routePath,
-                name: FutureFlowScreen.routeName,
-                builder: (context, state) => const FutureFlowScreen(),
-              ),
-            ],
+          GoRoute(
+            path: FutureFlowScreen.routePath,
+            name: FutureFlowScreen.routeName,
+            builder: (context, state) => const FutureFlowScreen(),
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: CashFlowScreen.routePath,
-                name: CashFlowScreen.routeName,
-                builder: (context, state) => const CashFlowScreen(),
-              ),
-            ],
+          GoRoute(
+            path: CashFlowScreen.routePath,
+            name: CashFlowScreen.routeName,
+            builder: (context, state) => const CashFlowScreen(),
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: FlowguardScreen.routePath,
-                name: FlowguardScreen.routeName,
-                builder: (context, state) => const FlowguardScreen(),
-              ),
-            ],
+          GoRoute(
+            path: FlowguardScreen.routePath,
+            name: FlowguardScreen.routeName,
+            builder: (context, state) => const FlowguardScreen(),
+          ),
+          GoRoute(
+            path: FutureHomeScreen.routePath,
+            name: FutureHomeScreen.routeName,
+            builder: (context, state) => const FutureHomeScreen(),
+          ),
+          GoRoute(
+            path: ShopScreen.routePath,
+            name: ShopScreen.routeName,
+            builder: (context, state) => const ShopScreen(),
           ),
         ],
       ),

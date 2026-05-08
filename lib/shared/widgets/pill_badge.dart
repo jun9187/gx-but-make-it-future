@@ -47,9 +47,9 @@ class PillBadge extends StatelessWidget {
           ],
           Text(
             label,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: AppColors.textPrimary,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: AppColors.textPrimary),
           ),
           if (trailing != null) ...[
             const SizedBox(width: AppSpacing.xs),

@@ -22,7 +22,8 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: backgroundGradient ??
+        gradient:
+            backgroundGradient ??
             const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -59,10 +60,7 @@ class AppScaffold extends StatelessWidget {
 }
 
 class _GlowOrb extends StatelessWidget {
-  const _GlowOrb({
-    required this.color,
-    required this.size,
-  });
+  const _GlowOrb({required this.color, required this.size});
 
   final Color color;
   final double size;
@@ -76,11 +74,7 @@ class _GlowOrb extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(
-              color: color,
-              blurRadius: 120,
-              spreadRadius: 24,
-            ),
+            BoxShadow(color: color, blurRadius: 120, spreadRadius: 24),
           ],
         ),
       ),

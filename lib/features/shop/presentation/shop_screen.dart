@@ -2,24 +2,29 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../data/mock/app_mock_data.dart';
+import '../../../data/models/app_mock_models.dart';
 import '../../../shared/widgets/icon_circle.dart';
+import '../../future_home/application/future_home_provider.dart';
 import '../../future_home/presentation/future_home_screen.dart';
 import '../../future_home/presentation/widgets/future_home_scene.dart';
 
-class ShopScreen extends StatelessWidget {
+class ShopScreen extends ConsumerWidget {
   const ShopScreen({super.key});
 
   static const routeName = 'shop';
   static const routePath = '/shop';
 
   @override
-  Widget build(BuildContext context) {
-    const data = _shopData;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final data = shopScreenData;
+    final state = ref.watch(futureHomeDemoProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -57,7 +62,7 @@ class ShopScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _ShopHeader(data: data),
+                  _ShopHeader(coins: state.coins, title: data.headerTitle),
                   const Spacer(),
                   _ShopStage(data: data),
                   const Spacer(),
@@ -73,9 +78,10 @@ class ShopScreen extends StatelessWidget {
 }
 
 class _ShopHeader extends StatelessWidget {
-  const _ShopHeader({required this.data});
+  const _ShopHeader({required this.coins, required this.title});
 
-  final _ShopScreenData data;
+  final int coins;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +93,7 @@ class _ShopHeader extends StatelessWidget {
           iconSize: 16,
           backgroundColor: AppColors.background.withValues(alpha: 0.48),
           color: Colors.white,
-          onTap: () => context.go(FutureHomeScreen.routePath),
+          onTap: () => _backToHome(context),
         ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
@@ -102,7 +108,7 @@ class _ShopHeader extends StatelessWidget {
               border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
             ),
             child: Text(
-              data.headerTitle,
+              title,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(
@@ -140,7 +146,7 @@ class _ShopHeader extends StatelessWidget {
               ),
               const SizedBox(width: AppSpacing.xs),
               Text(
-                '${data.coins}',
+                '$coins',
                 style: Theme.of(
                   context,
                 ).textTheme.labelLarge?.copyWith(color: Colors.white),
@@ -153,13 +159,16 @@ class _ShopHeader extends StatelessWidget {
   }
 }
 
-class _ShopStage extends StatelessWidget {
+class _ShopStage extends ConsumerWidget {
   const _ShopStage({required this.data});
 
-  final _ShopScreenData data;
+  final ShopScreenData data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final controller = ref.read(futureHomeDemoProvider.notifier);
+    final state = ref.watch(futureHomeDemoProvider);
+
     return Column(
       children: [
         Text(
@@ -181,7 +190,14 @@ class _ShopStage extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.xxl),
         for (var i = 0; i < data.items.length; i++) ...[
-          _ShopCard(item: data.items[i])
+          _ShopCard(
+                item: data.items[i],
+                isOwned: state.ownedItemIds.contains(
+                  data.items[i].rewardItemId,
+                ),
+                canAfford: controller.canUnlock(data.items[i]),
+                onTap: () => _showGachaDialog(context, ref, data.items[i]),
+              )
               .animate()
               .fadeIn(
                 delay: Duration(milliseconds: 120 + (i * 70)),
@@ -196,102 +212,126 @@ class _ShopStage extends StatelessWidget {
 }
 
 class _ShopCard extends StatelessWidget {
-  const _ShopCard({required this.item});
+  const _ShopCard({
+    required this.item,
+    required this.isOwned,
+    required this.canAfford,
+    required this.onTap,
+  });
 
-  final _ShopItem item;
+  final ShopItemData item;
+  final bool isOwned;
+  final bool canAfford;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.xl),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: const Color(0xA1261F31),
-            borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x26000000),
-                blurRadius: 22,
-                offset: Offset(0, 14),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: const Color(0xA1261F31),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x26000000),
+                    blurRadius: 22,
+                    offset: Offset(0, 14),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: item.iconGradient,
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: Icon(item.icon, color: Colors.white, size: 28),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: item.iconGradient,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Icon(item.icon, color: Colors.white, size: 28),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.title,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          item.description,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.74),
+                                height: 1.45,
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          isOwned
+                              ? 'Unlocked in inventory'
+                              : canAfford
+                              ? item.caption
+                              : 'Not enough Flow Coins',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: isOwned
+                                    ? const Color(0xFFD5FFC9)
+                                    : canAfford
+                                    ? item.accentColor.withValues(alpha: 0.95)
+                                    : AppColors.textMuted,
+                                letterSpacing: 0.4,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: item.priceBackground,
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${item.price}',
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(color: item.priceTextColor),
+                        ),
+                        const SizedBox(width: AppSpacing.xxs),
+                        Icon(
+                          Icons.monetization_on_rounded,
+                          size: 14,
+                          color: item.priceTextColor,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleLarge?.copyWith(color: Colors.white),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      item.description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.74),
-                        height: 1.45,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      item.caption,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: item.accentColor.withValues(alpha: 0.95),
-                        letterSpacing: 0.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: item.priceBackground,
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${item.price}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: item.priceTextColor,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xxs),
-                    Icon(
-                      Icons.monetization_on_rounded,
-                      size: 14,
-                      color: item.priceTextColor,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -317,7 +357,7 @@ class _BackHomeButton extends StatelessWidget {
                 border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
               ),
               child: TextButton.icon(
-                onPressed: () => context.go(FutureHomeScreen.routePath),
+                onPressed: () => _backToHome(context),
                 icon: const Icon(Icons.close_rounded, size: 18),
                 label: Text(label),
                 style: TextButton.styleFrom(
@@ -337,82 +377,247 @@ class _BackHomeButton extends StatelessWidget {
   }
 }
 
-class _ShopScreenData {
-  const _ShopScreenData({
-    required this.headerTitle,
-    required this.coins,
-    required this.title,
-    required this.subtitle,
-    required this.backLabel,
-    required this.items,
-  });
+class _GachaDialog extends ConsumerStatefulWidget {
+  const _GachaDialog({required this.item});
 
-  final String headerTitle;
-  final int coins;
-  final String title;
-  final String subtitle;
-  final String backLabel;
-  final List<_ShopItem> items;
+  final ShopItemData item;
+
+  @override
+  ConsumerState<_GachaDialog> createState() => _GachaDialogState();
 }
 
-class _ShopItem {
-  const _ShopItem({
-    required this.title,
-    required this.description,
-    required this.caption,
-    required this.price,
-    required this.icon,
-    required this.iconGradient,
-    required this.priceBackground,
-    required this.priceTextColor,
-    required this.accentColor,
-  });
+class _GachaDialogState extends ConsumerState<_GachaDialog> {
+  bool _revealed = false;
+  bool _completed = false;
 
-  final String title;
-  final String description;
-  final String caption;
-  final int price;
-  final IconData icon;
-  final Gradient iconGradient;
-  final Color priceBackground;
-  final Color priceTextColor;
-  final Color accentColor;
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(const Duration(milliseconds: 1500), () {
+      if (mounted) {
+        setState(() => _revealed = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(futureHomeDemoProvider);
+    final controller = ref.read(futureHomeDemoProvider.notifier);
+    final reward = rewardInventoryCatalog.firstWhere(
+      (entry) => entry.id == widget.item.rewardItemId,
+    );
+    final isOwned = state.ownedItemIds.contains(reward.id);
+    final canAfford = controller.canUnlock(widget.item);
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            decoration: BoxDecoration(
+              color: AppColors.surface.withValues(alpha: 0.96),
+              border: Border.all(color: AppColors.stroke),
+              borderRadius: BorderRadius.circular(AppRadius.xxl),
+            ),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: !_revealed
+                  ? _GachaLoadingView(item: widget.item)
+                  : _GachaRevealView(
+                      item: widget.item,
+                      reward: reward,
+                      isOwned: isOwned,
+                      canAfford: canAfford,
+                      completed: _completed,
+                      onConfirm: () {
+                        if (!_completed && canAfford) {
+                          controller.unlockReward(widget.item);
+                          setState(() => _completed = true);
+                        }
+                      },
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-const _shopData = _ShopScreenData(
-  headerTitle: 'Mystery Shop',
-  coins: 450,
-  title: 'Unlock Your Style',
-  subtitle: 'Choose a curated reward box to personalize your future space.',
-  backLabel: 'BACK TO HOME',
-  items: [
-    _ShopItem(
-      title: 'Furniture Box',
-      description:
-          'Rare and modern decor pieces for a more elevated room vibe.',
-      caption: 'Curated interior upgrades',
-      price: 100,
-      icon: Icons.chair_outlined,
-      iconGradient: LinearGradient(
-        colors: [Color(0xFF7639FF), Color(0xFF9F67FF)],
-      ),
-      priceBackground: Color(0xFFE0C9FF),
-      priceTextColor: Color(0xFF5E2C8F),
-      accentColor: Color(0xFFCAA5FF),
-    ),
-    _ShopItem(
-      title: 'Pet Mystery Box',
-      description:
-          'Adopt a digital companion that adds warmth and personality.',
-      caption: 'Playful companion unlock',
-      price: 250,
-      icon: Icons.pets_rounded,
-      iconGradient: LinearGradient(
-        colors: [Color(0xFFE4008B), Color(0xFFFF5DB8)],
-      ),
-      priceBackground: Color(0xFFFFB3D4),
-      priceTextColor: Color(0xFF8E1D58),
-      accentColor: Color(0xFFFF8DC7),
-    ),
-  ],
-);
+class _GachaLoadingView extends StatelessWidget {
+  const _GachaLoadingView({required this.item});
+
+  final ShopItemData item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      key: const ValueKey('loading'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                gradient: item.iconGradient,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: item.accentColor.withValues(alpha: 0.35),
+                    blurRadius: 30,
+                    spreadRadius: 6,
+                  ),
+                ],
+              ),
+              child: Icon(item.icon, color: Colors.white, size: 42),
+            )
+            .animate(onPlay: (controller) => controller.repeat())
+            .rotate(duration: 1100.ms)
+            .scale(
+              begin: const Offset(0.92, 0.92),
+              end: const Offset(1.08, 1.08),
+              duration: 700.ms,
+            )
+            .then()
+            .scale(
+              begin: const Offset(1.08, 1.08),
+              end: const Offset(0.92, 0.92),
+              duration: 700.ms,
+            ),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'Drawing reward...',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          'FutureFlow is opening your ${item.title.toLowerCase()}',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+            height: 1.45,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GachaRevealView extends StatelessWidget {
+  const _GachaRevealView({
+    required this.item,
+    required this.reward,
+    required this.isOwned,
+    required this.canAfford,
+    required this.completed,
+    required this.onConfirm,
+  });
+
+  final ShopItemData item;
+  final RewardInventoryItemData reward;
+  final bool isOwned;
+  final bool canAfford;
+  final bool completed;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final successState = completed || isOwned;
+
+    return Column(
+      key: const ValueKey('reveal'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+              width: 108,
+              height: 108,
+              decoration: BoxDecoration(
+                color: reward.surfaceColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: reward.accentColor.withValues(alpha: 0.36),
+                    blurRadius: 26,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+              child: Icon(reward.icon, color: reward.accentColor, size: 48),
+            )
+            .animate()
+            .fadeIn(duration: 260.ms)
+            .scale(begin: const Offset(0.8, 0.8)),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          item.rewardRevealTitle,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          item.rewardRevealSubtitle,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+            height: 1.45,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          reward.rarityLabel.toUpperCase(),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            color: reward.accentColor,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        SizedBox(
+          width: double.infinity,
+          child: successState
+              ? FilledButton(
+                  onPressed: () => context.go(FutureHomeScreen.routePath),
+                  child: const Text('Go To Inventory'),
+                )
+              : TextButton(
+                  onPressed: canAfford ? onConfirm : null,
+                  style: TextButton.styleFrom(
+                    backgroundColor: canAfford
+                        ? reward.accentColor.withValues(alpha: 0.18)
+                        : AppColors.surfaceElevated,
+                    foregroundColor: canAfford
+                        ? Colors.white
+                        : AppColors.textMuted,
+                  ),
+                  child: Text(
+                    canAfford ? 'Add To Inventory' : 'Not Enough Flow Coins',
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> _showGachaDialog(
+  BuildContext context,
+  WidgetRef ref,
+  ShopItemData item,
+) async {
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (context) => _GachaDialog(item: item),
+  );
+}
+
+void _backToHome(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+    return;
+  }
+  context.go(FutureHomeScreen.routePath);
+}

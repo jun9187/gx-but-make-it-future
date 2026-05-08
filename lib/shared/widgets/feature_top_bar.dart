@@ -9,18 +9,25 @@ class FeatureTopBar extends StatelessWidget {
     super.key,
     required this.title,
     this.leadingIcon = Icons.arrow_back_rounded,
+    this.onLeadingTap,
     this.trailing,
   });
 
   final String title;
   final IconData leadingIcon;
+  final VoidCallback? onLeadingTap;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        IconCircle(icon: leadingIcon, size: 40, iconSize: 18),
+        IconCircle(
+          icon: leadingIcon,
+          size: 40,
+          iconSize: 18,
+          onTap: onLeadingTap,
+        ),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(title, style: Theme.of(context).textTheme.titleLarge),

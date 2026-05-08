@@ -1,15 +1,19 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../data/mock/app_mock_data.dart';
+import '../../../data/models/app_mock_models.dart';
 import '../../../shared/widgets/app_progress_bar.dart';
 import '../../../shared/widgets/feature_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
 import '../../../shared/widgets/icon_circle.dart';
 import '../../../shared/widgets/section_header.dart';
+import '../../dashboard/presentation/dashboard_screen.dart';
 
 class CashFlowScreen extends StatelessWidget {
   const CashFlowScreen({super.key});
@@ -19,7 +23,7 @@ class CashFlowScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const data = _cashFlowData;
+    const data = cashFlowScreenData;
 
     return SafeArea(
       child: ListView(
@@ -30,8 +34,9 @@ class CashFlowScreen extends StatelessWidget {
           120,
         ),
         children: [
-          const FeatureTopBar(
+          FeatureTopBar(
             title: 'Cash Flow',
+            onLeadingTap: () => _goBackOrDashboard(context),
           ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.05, end: 0),
           const SizedBox(height: AppSpacing.lg),
           _InsightBanner(text: data.insight)
@@ -58,6 +63,14 @@ class CashFlowScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+void _goBackOrDashboard(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+    return;
+  }
+  context.go(DashboardScreen.routePath);
 }
 
 class _InsightBanner extends StatelessWidget {
@@ -110,7 +123,7 @@ class _SpendingDonutCard extends StatelessWidget {
   });
 
   final String totalSpentLabel;
-  final List<_CashFlowCategoryData> categories;
+  final List<SpendingCategoryData> categories;
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +180,7 @@ class _SpendingDonutCard extends StatelessWidget {
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({required this.data});
 
-  final _CashFlowCategoryData data;
+  final SpendingCategoryData data;
 
   @override
   Widget build(BuildContext context) {
@@ -243,78 +256,3 @@ class _CategoryTile extends StatelessWidget {
     );
   }
 }
-
-class _CashFlowScreenData {
-  const _CashFlowScreenData({
-    required this.insight,
-    required this.totalSpentLabel,
-    required this.categories,
-  });
-
-  final String insight;
-  final String totalSpentLabel;
-  final List<_CashFlowCategoryData> categories;
-}
-
-class _CashFlowCategoryData {
-  const _CashFlowCategoryData({
-    required this.title,
-    required this.transactionCount,
-    required this.amountLabel,
-    required this.percentLabel,
-    required this.share,
-    required this.icon,
-    required this.color,
-  });
-
-  final String title;
-  final int transactionCount;
-  final String amountLabel;
-  final String percentLabel;
-  final double share;
-  final IconData icon;
-  final Color color;
-}
-
-const _cashFlowData = _CashFlowScreenData(
-  insight: 'Transfer and services are driving most of this week’s spend.',
-  totalSpentLabel: 'RM 258.00',
-  categories: [
-    _CashFlowCategoryData(
-      title: 'Transfer',
-      transactionCount: 4,
-      amountLabel: 'RM 103.20',
-      percentLabel: '40%',
-      share: 0.40,
-      icon: Icons.swap_horiz_rounded,
-      color: Color(0xFF7A3FF2),
-    ),
-    _CashFlowCategoryData(
-      title: 'Services',
-      transactionCount: 6,
-      amountLabel: 'RM 77.40',
-      percentLabel: '30%',
-      share: 0.30,
-      icon: Icons.settings_outlined,
-      color: Color(0xFFD55F93),
-    ),
-    _CashFlowCategoryData(
-      title: 'Shops',
-      transactionCount: 3,
-      amountLabel: 'RM 38.70',
-      percentLabel: '15%',
-      share: 0.15,
-      icon: Icons.storefront_outlined,
-      color: Color(0xFFC5721E),
-    ),
-    _CashFlowCategoryData(
-      title: 'Food & Drink',
-      transactionCount: 8,
-      amountLabel: 'RM 38.70',
-      percentLabel: '15%',
-      share: 0.15,
-      icon: Icons.restaurant_outlined,
-      color: Color(0xFFFFB8B0),
-    ),
-  ],
-);

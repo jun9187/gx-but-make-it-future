@@ -8,20 +8,14 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../application/shell_provider.dart';
 
 class AppShell extends ConsumerWidget {
-  const AppShell({super.key, required this.navigationShell});
+  const AppShell({super.key, required this.child});
 
-  final StatefulNavigationShell navigationShell;
-
-  void _onTap(int index) {
-    navigationShell.goBranch(
-      index,
-      initialLocation: index == navigationShell.currentIndex,
-    );
-  }
+  final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +23,7 @@ class AppShell extends ConsumerWidget {
 
     return AppScaffold(
       extendBody: true,
-      body: navigationShell,
+      body: child,
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(
           AppSpacing.md,
@@ -60,12 +54,13 @@ class AppShell extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    for (var i = 0; i < destinations.length; i++)
+                    for (final destination in destinations)
                       Expanded(
                         child: _ShellNavItem(
-                          destination: destinations[i],
-                          isActive: i == navigationShell.currentIndex,
-                          onTap: () => _onTap(i),
+                          destination: destination,
+                          onTap: destination.isEnabled
+                              ? () => context.go(DashboardScreen.routePath)
+                              : null,
                         ),
                       ),
                   ],
@@ -80,18 +75,15 @@ class AppShell extends ConsumerWidget {
 }
 
 class _ShellNavItem extends StatelessWidget {
-  const _ShellNavItem({
-    required this.destination,
-    required this.isActive,
-    required this.onTap,
-  });
+  const _ShellNavItem({required this.destination, this.onTap});
 
   final ShellDestination destination;
-  final bool isActive;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final isActive = destination.isActive;
+
     return InkWell(
       borderRadius: BorderRadius.circular(AppRadius.lg),
       onTap: onTap,

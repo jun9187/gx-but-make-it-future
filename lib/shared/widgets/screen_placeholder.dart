@@ -33,10 +33,7 @@ class ScreenPlaceholder extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppTopBar(
-              title: title,
-              eyebrow: eyebrow,
-            ),
+            AppTopBar(title: title, eyebrow: eyebrow),
             GlassCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,10 +43,7 @@ class ScreenPlaceholder extends StatelessWidget {
                     size: 56,
                     iconSize: 24,
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF6F4CFF),
-                        Color(0xFFD946EF),
-                      ],
+                      colors: [Color(0xFF6F4CFF), Color(0xFFD946EF)],
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
@@ -60,9 +54,9 @@ class ScreenPlaceholder extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     description,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          height: 1.5,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(height: 1.5),
                   ),
                 ],
               ),

@@ -7,6 +7,8 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../data/mock/app_mock_data.dart';
+import '../../../data/models/app_mock_models.dart';
 import '../../../shared/widgets/app_progress_bar.dart';
 import '../../../shared/widgets/app_top_bar.dart';
 import '../../../shared/widgets/glass_card.dart';
@@ -24,7 +26,7 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const dashboard = _dashboardData;
+    const dashboard = dashboardScreenData;
 
     return SafeArea(
       child: ListView(
@@ -50,7 +52,7 @@ class DashboardScreen extends StatelessWidget {
               .slideY(begin: 0.08, end: 0),
           const SizedBox(height: AppSpacing.xl),
           _DashboardCardLink(
-            onTap: () => context.go(CashFlowScreen.routePath),
+            onTap: () => context.push(CashFlowScreen.routePath),
             child: _CashFlowPreviewCard(
               data: dashboard.cashFlow,
               categories: dashboard.categories,
@@ -60,19 +62,22 @@ class DashboardScreen extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _MetricOverviewCard(
-                  title: 'Streak',
-                  value: '${dashboard.streakWeeks} Weeks',
-                  caption: 'Staying under safe-to-spend',
-                  icon: Icons.bolt_rounded,
-                  iconBackground: const Color(0x26FF9D5C),
-                  iconColor: const Color(0xFFFFC96B),
+                child: _DashboardCardLink(
+                  onTap: () => _showAutoSaveSheet(context),
+                  child: _MetricOverviewCard(
+                    title: 'Streak',
+                    value: '${dashboard.streakWeeks} Weeks',
+                    caption: 'Staying under safe-to-spend',
+                    icon: Icons.bolt_rounded,
+                    iconBackground: const Color(0x26FF9D5C),
+                    iconColor: const Color(0xFFFFC96B),
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _DashboardCardLink(
-                  onTap: () => context.go(FlowguardScreen.routePath),
+                  onTap: () => context.push(FlowguardScreen.routePath),
                   child: _MetricOverviewCard(
                     title: 'FlowGuard',
                     value: dashboard.flowGuardStatus,
@@ -87,8 +92,8 @@ class DashboardScreen extends StatelessWidget {
           ).animate().fadeIn(delay: 180.ms, duration: 280.ms),
           const SizedBox(height: AppSpacing.lg),
           _DashboardCardLink(
-            onTap: () => context.go(FutureHomeScreen.routePath),
-            child: _FutureHomePreviewCard(data: dashboard.futureHome),
+            onTap: () => context.push(FutureHomeScreen.routePath),
+            child: _FutureHomePreviewCard(data: dashboard.rewardStatus),
           ).animate().fadeIn(delay: 240.ms, duration: 320.ms),
         ],
       ),
@@ -118,7 +123,7 @@ class _DashboardCardLink extends StatelessWidget {
 class _BalanceHeroCard extends StatelessWidget {
   const _BalanceHeroCard({required this.data});
 
-  final _DashboardHeroData data;
+  final DashboardHeroData data;
 
   @override
   Widget build(BuildContext context) {
@@ -208,8 +213,8 @@ class _BalanceHeroCard extends StatelessWidget {
 class _CashFlowPreviewCard extends StatelessWidget {
   const _CashFlowPreviewCard({required this.data, required this.categories});
 
-  final _CashFlowPreviewData data;
-  final List<_CategoryData> categories;
+  final CashFlowOverviewData data;
+  final List<SpendingCategoryData> categories;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +299,7 @@ class _CashFlowPreviewCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     for (final category in categories) ...[
-                      _LegendDot(label: category.label, color: category.color),
+                      _LegendDot(label: category.title, color: category.color),
                       const SizedBox(height: AppSpacing.sm),
                     ],
                   ],
@@ -367,7 +372,7 @@ class _MetricOverviewCard extends StatelessWidget {
 class _FutureHomePreviewCard extends StatelessWidget {
   const _FutureHomePreviewCard({required this.data});
 
-  final _FutureHomePreviewData data;
+  final RewardStatusData data;
 
   @override
   Widget build(BuildContext context) {
@@ -415,34 +420,30 @@ class _FutureHomePreviewCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Row(
-                          children: [
-                            const IconCircle(
-                              icon: Icons.forest_rounded,
-                              size: 28,
-                              iconSize: 14,
-                              backgroundColor: Color(0x66B7F57B),
-                              color: Color(0xFFE9FFE0),
-                            ),
-                            const SizedBox(width: AppSpacing.xs),
-                            Text(
-                              'REWARD SPACE',
-                              style: Theme.of(context).textTheme.labelSmall
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.62),
-                                  ),
-                            ),
-                            const SizedBox(height: AppSpacing.xxs),
-                            Text(
-                              data.title,
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(color: Colors.white),
-                            ),
-                          ],
+                        const IconCircle(
+                          icon: Icons.forest_rounded,
+                          size: 28,
+                          iconSize: 14,
+                          backgroundColor: Color(0x66B7F57B),
+                          color: Color(0xFFE9FFE0),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
-                          data.subtitle,
+                          'REWARD SPACE',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.62),
+                              ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          data.rewardTitle,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          data.rewardSubtitle,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Colors.white.withValues(alpha: 0.84),
@@ -473,7 +474,7 @@ class _FutureHomePreviewCard extends StatelessWidget {
                         ),
                         const SizedBox(width: AppSpacing.xs),
                         Text(
-                          '${data.coinBalance} Coins',
+                          '${data.coins} Coins',
                           style: Theme.of(
                             context,
                           ).textTheme.labelLarge?.copyWith(color: Colors.white),
@@ -519,6 +520,95 @@ class _LegendDot extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+Future<void> _showAutoSaveSheet(BuildContext context) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (context) {
+      return Container(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xl,
+        ),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xxl),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Auto-Save + Streak',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Because you stayed within your weekly safe flow, FutureFlow auto-moved leftover money into your GX Savings Pocket.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _SheetMetric(
+              label: 'This week auto-saved',
+              value: formatCurrency(rewardStatusData.autoSavedAmount),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _SheetMetric(
+              label: 'Savings Pocket balance',
+              value: formatCurrency(rewardStatusData.savingsPocketBalance),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            _SheetMetric(
+              label: 'Current streak',
+              value: '${rewardStatusData.streakWeeks} weeks',
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _SheetMetric extends StatelessWidget {
+  const _SheetMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceElevated,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.stroke),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Text(value, style: Theme.of(context).textTheme.titleMedium),
+        ],
+      ),
     );
   }
 }
@@ -598,94 +688,3 @@ class _RoomSceneArtwork extends StatelessWidget {
     );
   }
 }
-
-class _DashboardData {
-  const _DashboardData({
-    required this.hero,
-    required this.cashFlow,
-    required this.categories,
-    required this.streakWeeks,
-    required this.flowGuardStatus,
-    required this.flowGuardCaption,
-    required this.futureHome,
-  });
-
-  final _DashboardHeroData hero;
-  final _CashFlowPreviewData cashFlow;
-  final List<_CategoryData> categories;
-  final int streakWeeks;
-  final String flowGuardStatus;
-  final String flowGuardCaption;
-  final _FutureHomePreviewData futureHome;
-}
-
-class _DashboardHeroData {
-  const _DashboardHeroData({
-    required this.currentBalance,
-    required this.spentAmount,
-    required this.limitAmount,
-  });
-
-  final double currentBalance;
-  final double spentAmount;
-  final double limitAmount;
-
-  double get spentRatio => limitAmount == 0 ? 0 : spentAmount / limitAmount;
-}
-
-class _CashFlowPreviewData {
-  const _CashFlowPreviewData({required this.totalSpent, required this.insight});
-
-  final double totalSpent;
-  final String insight;
-}
-
-class _CategoryData {
-  const _CategoryData({
-    required this.label,
-    required this.share,
-    required this.color,
-  });
-
-  final String label;
-  final double share;
-  final Color color;
-}
-
-class _FutureHomePreviewData {
-  const _FutureHomePreviewData({
-    required this.title,
-    required this.subtitle,
-    required this.coinBalance,
-  });
-
-  final String title;
-  final String subtitle;
-  final int coinBalance;
-}
-
-const _dashboardData = _DashboardData(
-  hero: _DashboardHeroData(
-    currentBalance: 142,
-    spentAmount: 258,
-    limitAmount: 400,
-  ),
-  cashFlow: _CashFlowPreviewData(
-    totalSpent: 258,
-    insight: 'Your spending is 12% lower than last week. Great job!',
-  ),
-  categories: [
-    _CategoryData(label: 'Transfer', share: 0.40, color: Color(0xFF7A3FF2)),
-    _CategoryData(label: 'Services', share: 0.30, color: Color(0xFFFFB38B)),
-    _CategoryData(label: 'Shops', share: 0.15, color: Color(0xFFE3008C)),
-    _CategoryData(label: 'Food & Drink', share: 0.15, color: Color(0xFFFFB9D4)),
-  ],
-  streakWeeks: 3,
-  flowGuardStatus: 'Active',
-  flowGuardCaption: 'Daily alerts and spending nudges are on.',
-  futureHome: _FutureHomePreviewData(
-    title: 'Future Home',
-    subtitle: 'Customize your digital sanctuary',
-    coinBalance: 450,
-  ),
-);

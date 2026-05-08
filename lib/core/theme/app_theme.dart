@@ -85,7 +85,10 @@ abstract final class AppTheme {
         fillColor: AppColors.surfaceElevated,
         hintStyle: textTheme.bodyMedium,
         labelStyle: textTheme.bodyMedium,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
           borderSide: const BorderSide(color: AppColors.stroke),
