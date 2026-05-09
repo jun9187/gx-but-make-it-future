@@ -622,15 +622,151 @@ class _PlacedRewardAnimation extends StatelessWidget {
 
     if (!isHighlighted) return keyedChild;
 
-    return keyedChild
-        .animate()
-        .fadeIn(duration: 260.ms)
-        .scale(
-          begin: const Offset(0.82, 0.82),
-          end: const Offset(1, 1),
-          duration: 320.ms,
+    return _PlacementSparkleBurst(
+      key: ValueKey('sparkle-$version'),
+      child: keyedChild
+          .animate()
+          .fadeIn(duration: 260.ms)
+          .scale(
+            begin: const Offset(0.82, 0.82),
+            end: const Offset(1, 1),
+            duration: 320.ms,
+          )
+          .shimmer(
+            duration: 500.ms,
+            color: Colors.white.withValues(alpha: 0.35),
+          ),
+    );
+  }
+}
+
+class _PlacementSparkleBurst extends StatelessWidget {
+  const _PlacementSparkleBurst({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        IgnorePointer(
+          child: Container(
+            width: 104,
+            height: 104,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  Colors.white.withValues(alpha: 0.20),
+                  const Color(0xFF86FFE8).withValues(alpha: 0.16),
+                  Colors.transparent,
+                ],
+                stops: const [0, 0.58, 1],
+              ),
+            ),
+          )
+              .animate()
+              .scale(
+                begin: const Offset(0.45, 0.45),
+                end: const Offset(1.22, 1.22),
+                duration: 620.ms,
+                curve: Curves.easeOutCubic,
+              )
+              .fadeOut(
+                begin: 0.95,
+                delay: 120.ms,
+                duration: 560.ms,
+                curve: Curves.easeOut,
+              ),
+        ),
+        child,
+        const _PlacementSparkle(
+          top: -14,
+          left: 2,
+          size: 12,
+          delay: Duration.zero,
+        ),
+        const _PlacementSparkle(
+          top: 10,
+          right: -12,
+          size: 10,
+          delay: Duration(milliseconds: 90),
+        ),
+        const _PlacementSparkle(
+          bottom: 8,
+          left: -14,
+          size: 11,
+          delay: Duration(milliseconds: 150),
+          tint: Color(0xFF86FFE8),
+        ),
+        const _PlacementSparkle(
+          bottom: -12,
+          right: 4,
+          size: 9,
+          delay: Duration(milliseconds: 220),
+        ),
+      ],
+    );
+  }
+}
+
+class _PlacementSparkle extends StatelessWidget {
+  const _PlacementSparkle({
+    this.top,
+    this.right,
+    this.bottom,
+    this.left,
+    required this.size,
+    required this.delay,
+    this.tint = Colors.white,
+  });
+
+  final double? top;
+  final double? right;
+  final double? bottom;
+  final double? left;
+  final double size;
+  final Duration delay;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: top,
+      right: right,
+      bottom: bottom,
+      left: left,
+      child: IgnorePointer(
+        child: Icon(
+          Icons.auto_awesome_rounded,
+          size: size,
+          color: tint,
         )
-        .shimmer(duration: 500.ms, color: Colors.white.withValues(alpha: 0.35));
+            .animate()
+            .fadeIn(
+              delay: delay,
+              duration: 160.ms,
+              curve: Curves.easeOut,
+            )
+            .scale(
+              begin: const Offset(0.2, 0.2),
+              end: const Offset(1.18, 1.18),
+              delay: delay,
+              duration: 300.ms,
+              curve: Curves.easeOutBack,
+            )
+            .then(delay: 140.ms)
+            .fadeOut(duration: 260.ms, curve: Curves.easeIn)
+            .scale(
+              begin: const Offset(1, 1),
+              end: const Offset(1.45, 1.45),
+              duration: 260.ms,
+              curve: Curves.easeIn,
+            ),
+      ),
+    );
   }
 }
 
