@@ -18,7 +18,7 @@ const dashboardScreenData = DashboardScreenData(
   categories: spendingCategoryData,
   streakWeeks: 3,
   flowGuardStatus: 'Active',
-  flowGuardCaption: 'Daily alerts and spending nudges are on.',
+  flowGuardCaption: 'Night lock and recovery nudges are ready.',
   rewardStatus: rewardStatusData,
 );
 
@@ -146,7 +146,7 @@ const flowGuardScreenData = FlowGuardScreenData(
     overLimitAmount: 22,
     riskLevelLabel: 'Elevated Risk',
     riskSummary:
-        'FlowGuard detected fast spending pace plus emotionally risky patterns tonight.',
+        'FlowGuard detected a late-night emotional spending pattern after your QR payment.',
   ),
   signals: [
     FlowGuardSignalData(
@@ -172,60 +172,25 @@ const flowGuardScreenData = FlowGuardScreenData(
   ],
   guardrails: [
     FlowGuardOptionData(
-      title: 'Daily Flexible Spending',
-      subtitle: 'RM25/day',
-      icon: Icons.account_balance_wallet_outlined,
-      accentColor: Color(0xFFB48CFF),
-      state: FlowGuardOptionState.standard,
-    ),
-    FlowGuardOptionData(
-      title: 'Food Delivery Cap',
-      subtitle: 'RM50/week',
-      icon: Icons.delivery_dining_outlined,
-      accentColor: Color(0xFFF0A76C),
-      state: FlowGuardOptionState.active,
-    ),
-    FlowGuardOptionData(
-      title: 'E-wallet Transfers',
-      subtitle: 'RM80/week',
-      icon: Icons.swap_horiz_rounded,
-      accentColor: Color(0xFFE49A67),
-      state: FlowGuardOptionState.standard,
-    ),
-    FlowGuardOptionData(
-      title: 'Subscription Buffer',
-      subtitle: 'RM20/week',
-      icon: Icons.subscriptions_outlined,
-      accentColor: Color(0xFF8E7BC8),
-      state: FlowGuardOptionState.standard,
-    ),
-    FlowGuardOptionData(
-      title: 'Weekend Social Spending',
-      subtitle: 'RM80/week',
-      icon: Icons.celebration_outlined,
-      accentColor: Color(0xFF7280FF),
-      state: FlowGuardOptionState.standard,
-    ),
-    FlowGuardOptionData(
-      title: 'Emergency Buffer Lock',
-      subtitle: 'RM200 protected',
-      icon: Icons.shield_outlined,
-      accentColor: Color(0xFFC94F66),
-      state: FlowGuardOptionState.locked,
-    ),
-    FlowGuardOptionData(
-      title: 'Night Calm Lock',
-      subtitle: '11 PM to 6 AM (self-control mode)',
+      title: 'Night Lock',
+      subtitle: 'Pause transaction from 11pm to 6am',
       icon: Icons.dark_mode_outlined,
       accentColor: Color(0xFF6E7DFF),
+      state: FlowGuardOptionState.standard,
+    ),
+    FlowGuardOptionData(
+      title: 'Recovery Nudge',
+      subtitle: '',
+      icon: Icons.trending_down_rounded,
+      accentColor: Color(0xFFCA78FF),
       state: FlowGuardOptionState.active,
     ),
   ],
   recoveryNudge: RecoveryNudgeData(
-    title: 'Recovery Nudge',
-    timestamp: 'JUST NOW',
+    title: 'Open Night Lock?',
+    timestamp: '11:42 PM',
     message:
-        'You spent RM64 today, RM22 above pace. Trim tomorrow\'s spending limit to RM18 to stay on track?',
+        'FlowGuard spotted emotional spending after your night QR payment. Turn on Night Lock to pause non-essential spending until 6 AM?',
   ),
   recoveryActions: [
     FlowGuardRecoveryActionData(

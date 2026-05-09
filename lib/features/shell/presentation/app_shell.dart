@@ -8,18 +8,18 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_radius.dart';
 import '../../../core/constants/app_spacing.dart';
-import '../../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../../shared/widgets/app_scaffold.dart';
 import '../application/shell_provider.dart';
 
 class AppShell extends ConsumerWidget {
-  const AppShell({super.key, required this.child});
+  const AppShell({super.key, required this.currentPath, required this.child});
 
+  final String currentPath;
   final Widget child;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final destinations = ref.watch(shellDestinationsProvider);
+    final destinations = ref.watch(shellDestinationsProvider(currentPath));
 
     return AppScaffold(
       extendBody: true,
@@ -59,7 +59,7 @@ class AppShell extends ConsumerWidget {
                         child: _ShellNavItem(
                           destination: destination,
                           onTap: destination.isEnabled
-                              ? () => context.go(DashboardScreen.routePath)
+                              ? () => context.go(destination.routePath)
                               : null,
                         ),
                       ),

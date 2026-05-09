@@ -19,7 +19,11 @@ import '../../../shared/widgets/pill_badge.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../dashboard/presentation/dashboard_screen.dart';
 
-const double _floatingNudgeBottom = 70;
+const double _shellNavClearance = 18;
+const double _listBottomPadding = 188;
+const double _statusHeaderHeight = 40;
+
+enum _FlowGuardPromptType { nightLock, recoveryNudge }
 
 class FlowguardScreen extends StatefulWidget {
   const FlowguardScreen({super.key});
@@ -32,8 +36,10 @@ class FlowguardScreen extends StatefulWidget {
 }
 
 class _FlowguardScreenState extends State<FlowguardScreen> {
-  bool _showNudge = true;
   bool _showAcceptedMessage = false;
+  bool _nightLockEnabled = false;
+  String? _acceptedMessageText;
+  _FlowGuardPromptType? _activePrompt = _FlowGuardPromptType.nightLock;
   Timer? _acceptedMessageTimer;
 
   @override
@@ -54,7 +60,7 @@ class _FlowguardScreenState extends State<FlowguardScreen> {
               AppSpacing.lg,
               AppSpacing.lg,
               AppSpacing.lg,
-              300,
+              _listBottomPadding,
             ),
             children: [
               FeatureTopBar(
@@ -62,37 +68,37 @@ class _FlowguardScreenState extends State<FlowguardScreen> {
                 onLeadingTap: () => _goBackOrDashboard(context),
               ).animate().fadeIn(duration: 220.ms).slideY(begin: 0.05, end: 0),
               const SizedBox(height: AppSpacing.xl),
-              _StatusCard(data: data.status)
+              _StatusCard(
+                data: data.status,
+                isNightLockEnabled: _nightLockEnabled,
+              )
                   .animate()
                   .fadeIn(delay: 60.ms, duration: 280.ms)
                   .slideY(begin: 0.08, end: 0),
               const SizedBox(height: AppSpacing.xl),
-              const SectionHeader(title: 'Budgets'),
+              const SectionHeader(title: 'Guardrail'),
               const SizedBox(height: AppSpacing.md),
-              GlassCard(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    for (var i = 0; i < data.guardrails.length; i++) ...[
-                      _GuardrailRow(data: data.guardrails[i]),
-                      if (i != data.guardrails.length - 1)
-                        Divider(
-                          height: 1,
-                          color: AppColors.stroke.withValues(alpha: 0.8),
-                        ),
-                    ],
-                  ],
+              for (var i = 0; i < data.guardrails.length; i++) ...[
+                _GuardrailOptionCard(
+                  data: data.guardrails[i],
+                  isNightLockEnabled: _nightLockEnabled,
+                  onTap: () => _handleGuardrailTap(data.guardrails[i]),
+                ).animate().fadeIn(
+                  delay: Duration(milliseconds: 180 + (i * 60)),
+                  duration: 280.ms,
                 ),
-              ).animate().fadeIn(delay: 180.ms, duration: 280.ms),
+                if (i != data.guardrails.length - 1)
+                  const SizedBox(height: AppSpacing.md),
+              ],
             ],
           ),
-          if (_showNudge)
+          if (_activePrompt != null)
             Positioned(
               left: AppSpacing.lg,
               right: AppSpacing.lg,
-              bottom: _floatingNudgeBottom,
+              bottom: _shellNavClearance,
               child: _RecoveryNudgeOverlay(
-                data: data.recoveryNudge,
+                data: _promptData(data),
                 onAccept: _handleAccept,
                 onDismiss: _handleDismiss,
               ),
@@ -101,18 +107,52 @@ class _FlowguardScreenState extends State<FlowguardScreen> {
             Positioned(
               left: AppSpacing.xl,
               right: AppSpacing.xl,
-              bottom: _floatingNudgeBottom + 18,
-              child: const _AcceptedMessage(),
+              bottom: _shellNavClearance + 10,
+              child: _AcceptedMessage(message: _acceptedMessageText ?? ''),
             ),
         ],
       ),
     );
   }
 
-  void _handleAccept() {
+  RecoveryNudgeData _promptData(FlowGuardScreenData data) {
+    switch (_activePrompt) {
+      case _FlowGuardPromptType.recoveryNudge:
+        return const RecoveryNudgeData(
+          title: 'Open Recovery Nudge?',
+          timestamp: '11:43 PM',
+          message:
+              'You already spent above your safe limit today. Do you want FlowGuard to reduce tomorrow\'s limit to RM18 so you can recover your pace?',
+        );
+      case _FlowGuardPromptType.nightLock:
+      case null:
+        return data.recoveryNudge;
+    }
+  }
+
+  void _handleGuardrailTap(FlowGuardOptionData option) {
     setState(() {
-      _showNudge = false;
+      _showAcceptedMessage = false;
+      _activePrompt = option.title == 'Recovery Nudge'
+          ? _FlowGuardPromptType.recoveryNudge
+          : _FlowGuardPromptType.nightLock;
+    });
+  }
+
+  void _handleAccept() {
+    final prompt = _activePrompt;
+
+    setState(() {
+      _activePrompt = null;
       _showAcceptedMessage = true;
+      if (prompt == _FlowGuardPromptType.recoveryNudge) {
+        _acceptedMessageText =
+            'Tomorrow\'s spending limit is now reduced to RM18 to help you recover your pace.';
+      } else {
+        _nightLockEnabled = true;
+        _acceptedMessageText =
+            'Night Lock is now active from 11 PM to 6 AM.';
+      }
     });
 
     _acceptedMessageTimer?.cancel();
@@ -124,7 +164,7 @@ class _FlowguardScreenState extends State<FlowguardScreen> {
   }
 
   void _handleDismiss() {
-    setState(() => _showNudge = false);
+    setState(() => _activePrompt = null);
   }
 }
 
@@ -137,9 +177,13 @@ void _goBackOrDashboard(BuildContext context) {
 }
 
 class _StatusCard extends StatelessWidget {
-  const _StatusCard({required this.data});
+  const _StatusCard({
+    required this.data,
+    required this.isNightLockEnabled,
+  });
 
   final FlowGuardStatusData data;
+  final bool isNightLockEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -150,11 +194,17 @@ class _StatusCard extends StatelessWidget {
 
     return GradientCard(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [AppColors.heroStart, AppColors.heroEnd],
-      ),
+      gradient: isNightLockEnabled
+          ? const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF151728), Color(0xFF2A2144), Color(0xFF43305B)],
+            )
+          : const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.heroStart, AppColors.heroEnd],
+            ),
       borderColor: const Color(0x40FFFFFF),
       boxShadow: const [
         BoxShadow(
@@ -166,17 +216,68 @@ class _StatusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'FlowGuard',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+          SizedBox(
+            height: _statusHeaderHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Text(
+                    'FlowGuard',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(color: Colors.white),
+                  ),
+                ),
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: isNightLockEnabled ? 1 : 0,
+                  child: IgnorePointer(
+                    ignoring: !isNightLockEnabled,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(AppRadius.pill),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.18),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.nights_stay_rounded,
+                            size: 16,
+                            color: Color(0xFFE3D7FF),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            'Night Lock On',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelMedium?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.92),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
           Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.12),
+              color: isNightLockEnabled
+                  ? Colors.black.withValues(alpha: 0.24)
+                  : Colors.black.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
             ),
@@ -224,64 +325,114 @@ class _StatusCard extends StatelessWidget {
   }
 }
 
-class _GuardrailRow extends StatelessWidget {
-  const _GuardrailRow({required this.data});
+class _GuardrailOptionCard extends StatelessWidget {
+  const _GuardrailOptionCard({
+    required this.data,
+    required this.isNightLockEnabled,
+    this.onTap,
+  });
 
   final FlowGuardOptionData data;
+  final bool isNightLockEnabled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.md,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconCircle(
-            icon: data.icon,
-            size: 40,
-            iconSize: 18,
-            backgroundColor: data.accentColor.withValues(alpha: 0.12),
-            color: data.accentColor,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  data.title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  data.subtitle,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.35,
+    final isNightLock = data.title == 'Night Lock';
+    final isRecoveryNudge = data.title == 'Recovery Nudge';
+    final isActive = isNightLock
+        ? isNightLockEnabled
+        : data.state == FlowGuardOptionState.active;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        onTap: onTap,
+        child: GlassCard(
+          padding: EdgeInsets.zero,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(
+                color: isActive
+                    ? data.accentColor.withValues(alpha: 0.4)
+                    : AppColors.stroke.withValues(alpha: 0.85),
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  data.accentColor.withValues(alpha: isActive ? 0.18 : 0.10),
+                  AppColors.surface.withValues(alpha: 0.88),
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconCircle(
+                        icon: data.icon,
+                        size: 44,
+                        iconSize: 20,
+                        backgroundColor: data.accentColor.withValues(alpha: 0.16),
+                        color: data.accentColor,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Text(
+                          data.title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ),
+                      if (isRecoveryNudge)
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: const Color(0x26FF5C6D),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: const Color(0x66FF7C8B),
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            '!',
+                            style: TextStyle(
+                              color: Color(0xFFFF7E8D),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        )
+                      else
+                        PillBadge(
+                          label: isActive ? 'Active' : 'Inactive',
+                          isSelected: isActive,
+                        ),
+                    ],
                   ),
-                ),
-              ],
+                  if (data.subtitle.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      data.subtitle,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.45,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
-          if (data.state == FlowGuardOptionState.active)
-            PillBadge(label: 'Active', isSelected: true)
-          else if (data.state == FlowGuardOptionState.locked)
-            const Icon(
-              Icons.lock_outline_rounded,
-              size: 18,
-              color: AppColors.textSecondary,
-            )
-          else
-            const Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: AppColors.textSecondary,
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -306,14 +457,23 @@ class _RecoveryNudgeOverlay extends StatelessWidget {
         children: [
           Row(
             children: [
-              const IconCircle(
-                icon: Icons.trending_down_rounded,
+              IconCircle(
+                icon: data.title.contains('Recovery')
+                    ? Icons.error_outline_rounded
+                    : Icons.dark_mode_outlined,
                 size: 34,
                 iconSize: 16,
-                gradient: LinearGradient(
-                  colors: [AppColors.heroStart, AppColors.heroEnd],
-                ),
-                color: Colors.white,
+                backgroundColor: data.title.contains('Recovery')
+                    ? const Color(0x26FF5C6D)
+                    : null,
+                gradient: data.title.contains('Recovery')
+                    ? null
+                    : const LinearGradient(
+                        colors: [AppColors.heroStart, AppColors.heroEnd],
+                      ),
+                color: data.title.contains('Recovery')
+                    ? const Color(0xFFFFA1AE)
+                    : Colors.white,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
@@ -353,7 +513,11 @@ class _RecoveryNudgeOverlay extends StatelessWidget {
                       foregroundColor: const Color(0xFF4C1A7A),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('ACCEPT'),
+                    child: Text(
+                      data.title.contains('Recovery')
+                          ? 'LIMIT TOMORROW'
+                          : 'OPEN NIGHT LOCK',
+                    ),
                   ),
                 ),
               ),
@@ -368,7 +532,9 @@ class _RecoveryNudgeOverlay extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('DISMISS'),
+                  child: Text(
+                    data.title.contains('Recovery') ? 'NOT NOW' : 'NOT NOW',
+                  ),
                 ),
               ),
             ],
@@ -380,7 +546,9 @@ class _RecoveryNudgeOverlay extends StatelessWidget {
 }
 
 class _AcceptedMessage extends StatelessWidget {
-  const _AcceptedMessage();
+  const _AcceptedMessage({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -401,7 +569,7 @@ class _AcceptedMessage extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'Tomorrow’s spending limit adjusted. FlowGuard recovery plan is now active.',
+                  message,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.86),
                     height: 1.35,
